@@ -157,9 +157,9 @@ func (this *Canary) getNotifications(token string) (result []Notification, err e
 		return result, errors.New("unexpected response status from notifier " + resp.Status)
 	}
 	temp := NotificationList{}
-	err = json.NewDecoder(resp.Body).Decode(&temp)
+	err = json.Unmarshal(respMsg, &temp)
 	if err != nil {
-		log.Println("ERROR: unable to read notification", err)
+		log.Println("ERROR: unable to read notifications json", err)
 		this.metrics.NotificationReadErr.Inc()
 		return result, err
 	}
