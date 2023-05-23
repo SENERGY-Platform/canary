@@ -144,7 +144,7 @@ func (this *Canary) disconnect(conn *Conn) {
 
 func (this *Canary) subscribe(info DeviceInfo, conn *Conn) {
 	this.metrics.ConnectorSubscribeCount.Inc()
-	topic := "command/" + info.LocalId + "/cmd"
+	topic := "command/" + info.LocalId + "/+"
 	start := time.Now()
 	token := conn.Client.Subscribe(topic, 2, func(c paho.Client, message paho.Message) {})
 	token.Wait()
