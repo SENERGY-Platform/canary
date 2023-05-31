@@ -122,7 +122,10 @@ func (this *Canary) connect(hubId string) (conn *Conn, err error) {
 		SetPassword(this.config.AuthPassword).
 		SetAutoReconnect(true).
 		SetCleanSession(true).
-		AddBroker(this.config.ConnectorMqttBrokerUrl)
+		AddBroker(this.config.ConnectorMqttBrokerUrl).
+		SetConnectionLostHandler(func(c paho.Client, err error) {
+			log.Println("lost connection:", hubId, err)
+		})
 
 	this.metrics.ConnectorLoginCount.Inc()
 	conn.Client = paho.NewClient(options)
