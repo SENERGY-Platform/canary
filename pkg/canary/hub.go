@@ -19,6 +19,7 @@ package canary
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/permission-search/lib/client"
 	"log"
 	"net/http"
@@ -109,7 +110,7 @@ func (this *Canary) createCanaryHub(token string, device DeviceInfo) (hubId stri
 	}
 	req.Header.Set("Authorization", token)
 	start := time.Now()
-	hub, _, err = Do[HubInfo](req)
+	hub, _, err = devicemetadata.Do[HubInfo](req)
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
@@ -139,7 +140,7 @@ func (this *Canary) updateCanaryHub(token string, hubId string, device DeviceInf
 	}
 	req.Header.Set("Authorization", token)
 	start := time.Now()
-	hub, _, err = Do[HubInfo](req)
+	hub, _, err = devicemetadata.Do[HubInfo](req)
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()

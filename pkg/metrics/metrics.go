@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package canary
+package metrics
 
 import (
 	"github.com/prometheus/client_golang/prometheus"
@@ -72,6 +72,12 @@ type Metrics struct {
 	UnexpectedDeviceDataErr                    prometheus.Counter
 	UnexpectedNotificationStateErr             prometheus.Counter
 	UncategorizedErr                           prometheus.Counter
+
+	ProcessDeploymentErr               prometheus.Counter
+	ProcessStartErr                    prometheus.Counter
+	UnexpectedProcessInstanceStateErr  prometheus.Counter
+	ProcessUnexpectedCommandCountError prometheus.Counter
+	ProcessInstanceDurationMs          prometheus.Gauge
 }
 
 func NewMetrics(reg prometheus.Registerer) *Metrics {
@@ -89,7 +95,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_auth_err",
 			Help: "total count of auth errors since canary startup",
 		}),
-
 		DeviceMetaUpdateCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_device_meta_update_count",
 			Help: countHelpMsg,
@@ -102,7 +107,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_device_meta_update_err",
 			Help: "total count of device meta update errors since canary startup",
 		}),
-
 		DeviceRepoRequestCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_device_repo_request_count",
 			Help: countHelpMsg,
@@ -115,7 +119,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_device_repo_request_update_err",
 			Help: "total count of device repo request errors since canary startup",
 		}),
-
 		PermissionsRequestCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_permissions_request_count",
 			Help: countHelpMsg,
@@ -128,7 +131,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_permissions_request_update_err",
 			Help: "total count of permissions request errors since canary startup",
 		}),
-
 		DeviceDataRequestCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_device_data_request_count",
 			Help: countHelpMsg,
@@ -141,7 +143,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_device_data_request_update_err",
 			Help: "total count of device data request errors since canary startup",
 		}),
-
 		ConnectorLoginCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_connector_login_count",
 			Help: countHelpMsg,
@@ -154,7 +155,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_connector_login_err",
 			Help: "total count of connector login errors since canary startup",
 		}),
-
 		ConnectorSubscribeCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_connector_subscribe_count",
 			Help: countHelpMsg,
@@ -167,7 +167,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_connector_subscribe_err",
 			Help: "total count of connector subscribe errors since canary startup",
 		}),
-
 		ConnectorPublishCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_connector_publish_count",
 			Help: countHelpMsg,
@@ -180,7 +179,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_connector_publish_err",
 			Help: "total count of connector publish errors since canary startup",
 		}),
-
 		NotificationPublishCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_notification_publish_count",
 			Help: countHelpMsg,
@@ -193,7 +191,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_notification_publish_err",
 			Help: "total count of notification publish errors since canary startup",
 		}),
-
 		NotificationReadCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_notification_read_count",
 			Help: countHelpMsg,
@@ -206,7 +203,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_notification_read_err",
 			Help: "total count of notification read errors since canary startup",
 		}),
-
 		NotificationDeleteCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_notification_delete_count",
 			Help: countHelpMsg,
@@ -219,7 +215,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_notification_delete_err",
 			Help: "total count of notification delete errors since canary startup",
 		}),
-
 		UnexpectedPermissionsDeviceOnlineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_unexpected_permissions_device_online_state_err",
 			Help: "total count of unexpected permission device online state errors since canary startup",
@@ -247,6 +242,27 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 		UncategorizedErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_uncategorized_err",
 			Help: "total count of uncategorized errors since canary startup",
+		}),
+
+		ProcessDeploymentErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_process_deployment_err",
+			Help: "total count of process deployment errors since canary startup",
+		}),
+		ProcessStartErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_process_start_err",
+			Help: "total count of process start errors since canary startup",
+		}),
+		UnexpectedProcessInstanceStateErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_process_instance_state_err",
+			Help: "total count of process instance state errors since canary startup",
+		}),
+		ProcessUnexpectedCommandCountError: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_process_unexpected_command_count_err",
+			Help: "total count of unexpected command count errors since canary startup",
+		}),
+		ProcessInstanceDurationMs: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "canary_process_instance_duration_ms",
+			Help: "duration of process run in ms",
 		}),
 	}
 
@@ -301,6 +317,12 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 	reg.MustRegister(m.UnexpectedDeviceDataErr)
 	reg.MustRegister(m.UnexpectedNotificationStateErr)
 	reg.MustRegister(m.UncategorizedErr)
+
+	reg.MustRegister(m.ProcessDeploymentErr)
+	reg.MustRegister(m.ProcessStartErr)
+	reg.MustRegister(m.UnexpectedProcessInstanceStateErr)
+	reg.MustRegister(m.ProcessUnexpectedCommandCountError)
+	reg.MustRegister(m.ProcessInstanceDurationMs)
 
 	return m
 }

@@ -36,12 +36,14 @@ type Config struct {
 	AuthUsername string `json:"auth_username"`
 	AuthPassword string `json:"auth_password"`
 
-	PermissionSearchUrl    string `json:"permission_search_url"`
-	DeviceManagerUrl       string `json:"device_manager_url"`
-	DeviceRepositoryUrl    string `json:"device_repository_url"`
-	ConnectorMqttBrokerUrl string `json:"connector_mqtt_broker_url"`
-	LastValueQueryUrl      string `json:"last_value_query_url"`
-	NotificationUrl        string `json:"notification_url"`
+	PermissionSearchUrl     string `json:"permission_search_url"`
+	DeviceManagerUrl        string `json:"device_manager_url"`
+	DeviceRepositoryUrl     string `json:"device_repository_url"`
+	ConnectorMqttBrokerUrl  string `json:"connector_mqtt_broker_url"`
+	LastValueQueryUrl       string `json:"last_value_query_url"`
+	NotificationUrl         string `json:"notification_url"`
+	ProcessDeploymentUrl    string `json:"process_deployment_url"`
+	ProcessEngineWrapperUrl string `json:"process_engine_wrapper_url"`
 
 	CanaryDeviceClassId          string `json:"canary_device_class_id"`
 	CanaryCmdFunctionId          string `json:"canary_cmd_function_id"`

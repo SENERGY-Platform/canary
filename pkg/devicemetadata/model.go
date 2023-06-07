@@ -14,4 +14,23 @@
  * limitations under the License.
  */
 
-package canary
+package devicemetadata
+
+import "github.com/SENERGY-Platform/models/go/models"
+
+type DeviceInfo = models.Device
+type DeviceTypeInfo struct {
+	Id       string   `json:"id"`
+	Services []string `json:"service"`
+}
+
+type PermDevice struct {
+	Id          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Annotations map[string]interface{} `json:"annotations"`
+}
+
+const AttributeUsedForCanaryDevice = "senergy/canary-device"
+const AttributeUsedForCanaryDeviceType = "senergy/canary-device-type"
+const SensorServiceLocalId = "sensor"
+const CmdServiceLocalId = "cmd"

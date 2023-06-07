@@ -19,6 +19,9 @@ package canary
 import (
 	"context"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
+	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
+	"github.com/SENERGY-Platform/canary/pkg/metrics"
+	"github.com/SENERGY-Platform/canary/pkg/process"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/SENERGY-Platform/permission-search/lib/client"
 	"github.com/prometheus/client_golang/prometheus"
@@ -30,7 +33,7 @@ import (
 )
 
 type Canary struct {
-	metrics              *Metrics
+	metrics              *metrics.Metrics
 	reg                  *prometheus.Registry
 	config               configuration.Config
 	promHttpHandler      http.Handler
@@ -39,19 +42,38 @@ type Canary struct {
 	permissions          client.Client
 	guaranteeChangeAfter time.Duration
 	devicerepo           devicerepo.Interface
+	process              Process
+	devicemeta           *devicemetadata.DeviceMetaData
 }
 
 func New(ctx context.Context, wg *sync.WaitGroup, config configuration.Config) (canary *Canary, err error) {
 	guaranteeChangeAfter, err := time.ParseDuration(config.GuaranteeChangeAfter)
 	reg := prometheus.NewRegistry()
+
+	m := metrics.NewMetrics(reg)
+
+	d := devicerepo.NewClient(config.DeviceRepositoryUrl)
+	permissions := client.NewClient(config.PermissionSearchUrl)
+	devicemeta := devicemetadata.NewDeviceMetaData(permissions, d, m, config, guaranteeChangeAfter)
+
+	p := process.NewProcess(config, d, m, guaranteeChangeAfter)
+
 	return &Canary{
 		reg:                  reg,
-		metrics:              NewMetrics(reg),
+		metrics:              m,
 		config:               config,
-		permissions:          client.NewClient(config.PermissionSearchUrl),
-		devicerepo:           devicerepo.NewClient(config.DeviceRepositoryUrl),
+		permissions:          permissions,
+		devicerepo:           d,
 		guaranteeChangeAfter: guaranteeChangeAfter,
+		devicemeta:           devicemeta,
+		process:              p,
 	}, nil
+}
+
+type Process interface {
+	NotifyCommand(topic string, payload []byte)
+	ProcessStartup(token string, info DeviceInfo) error
+	ProcessTeardown(token string) error
 }
 
 func (this *Canary) GetMetricsHandler() (h http.Handler, err error) {
@@ -90,7 +112,7 @@ func (this *Canary) StartTests() {
 		}
 		defer this.logout(token, refresh)
 
-		deviceInfo, err := this.ensureDevice(token)
+		deviceInfo, err := this.devicemeta.EnsureDevice(token)
 		if err != nil {
 			return
 		}

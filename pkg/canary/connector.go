@@ -19,6 +19,7 @@ package canary
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/permission-search/lib/client"
 	"github.com/SENERGY-Platform/permission-search/lib/model"
 	paho "github.com/eclipse/paho.mqtt.golang"
@@ -55,6 +56,8 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 
 		this.publish(info, conn, value)
 
+		processErr := this.process.ProcessStartup(token, info)
+
 		time.Sleep(this.getChangeGuaranteeDuration())
 
 		this.checkDeviceConnState(token, info, true)
@@ -66,14 +69,14 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 		time.Sleep(this.getChangeGuaranteeDuration())
 
 		this.checkDeviceConnState(token, info, false)
+
+		if processErr == nil {
+			this.process.ProcessTeardown(token)
+		}
 	}()
 }
 
-type PermDevice struct {
-	Id          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Annotations map[string]interface{} `json:"annotations"`
-}
+type PermDevice = devicemetadata.PermDevice
 
 func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expectedConnState bool) {
 	this.metrics.PermissionsRequestCount.Inc()
@@ -149,7 +152,9 @@ func (this *Canary) subscribe(info DeviceInfo, conn *Conn) {
 	this.metrics.ConnectorSubscribeCount.Inc()
 	topic := "command/" + info.LocalId + "/+"
 	start := time.Now()
-	token := conn.Client.Subscribe(topic, 2, func(c paho.Client, message paho.Message) {})
+	token := conn.Client.Subscribe(topic, 2, func(c paho.Client, message paho.Message) {
+		this.process.NotifyCommand(message.Topic(), message.Payload())
+	})
 	token.Wait()
 	this.metrics.ConnectorSubscribeLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if token.Error() != nil {
@@ -199,7 +204,7 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 
 	serviceId := ""
 	for _, s := range dt.Services {
-		if s.LocalId == SensorServiceLocalId {
+		if s.LocalId == devicemetadata.SensorServiceLocalId {
 			serviceId = s.Id
 			break
 		}
@@ -224,7 +229,7 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	}
 	req.Header.Set("Authorization", token)
 	start = time.Now()
-	lastValues, _, err := Do[[]LastValue](req)
+	lastValues, _, err := devicemetadata.Do[[]LastValue](req)
 	this.metrics.DeviceDataRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceDataRequestErr.Inc()
