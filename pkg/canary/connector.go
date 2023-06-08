@@ -29,6 +29,7 @@ import (
 	"reflect"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -156,12 +157,60 @@ func (this *Canary) subscribe(info DeviceInfo, conn *Conn) {
 	start := time.Now()
 	token := conn.Client.Subscribe(topic, 2, func(c paho.Client, message paho.Message) {
 		this.process.NotifyCommand(message.Topic(), message.Payload())
+		go this.respond(conn, message.Topic(), message.Payload())
 	})
 	token.Wait()
 	this.metrics.ConnectorSubscribeLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if token.Error() != nil {
 		log.Println("Error on Client.Subscribe(): ", token.Error())
 		this.metrics.ConnectorSubscribeErr.Inc()
+		return
+	}
+}
+
+type ProtocolSegmentName = string
+type CommandRequestMsg = map[ProtocolSegmentName]string
+type CommandResponseMsg = map[ProtocolSegmentName]string
+
+type RequestEnvelope struct {
+	CorrelationId      string            `json:"correlation_id"`
+	Payload            CommandRequestMsg `json:"payload"`
+	Time               int64             `json:"timestamp"`
+	CompletionStrategy string            `json:"completion_strategy"`
+}
+
+type ResponseEnvelope struct {
+	CorrelationId string             `json:"correlation_id"`
+	Payload       CommandResponseMsg `json:"payload"`
+}
+
+func (this *Canary) respond(conn *Conn, cmdtopic string, cmdpayload []byte) {
+	request := RequestEnvelope{}
+	err := json.Unmarshal(cmdpayload, &request)
+	if err != nil {
+		log.Println("ERROR: unable to decode request envalope", err)
+		return
+	}
+
+	emptyResp := CommandResponseMsg{}
+	for k, _ := range request.Payload {
+		emptyResp[k] = ""
+	}
+
+	payload, err := json.Marshal(ResponseEnvelope{CorrelationId: request.CorrelationId, Payload: emptyResp})
+	if err != nil {
+		log.Println("ERROR: respond marshal", err)
+		this.metrics.UncategorizedErr.Inc()
+		return
+	}
+
+	topic := strings.Replace(cmdtopic, "command/", "response/", 1)
+
+	token := conn.Client.Publish(topic, 2, false, payload)
+	token.Wait()
+	if token.Error() != nil {
+		log.Println("ERROR: respond Publish", err)
+		this.metrics.UncategorizedErr.Inc()
 		return
 	}
 }
