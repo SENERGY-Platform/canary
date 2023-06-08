@@ -66,7 +66,6 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 		this.checkDeviceValue(token, info, value)
 
 		if processErr == nil {
-			time.Sleep(20 * time.Second)
 			this.process.ProcessTeardown(token)
 		}
 
