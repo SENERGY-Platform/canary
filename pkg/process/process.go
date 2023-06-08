@@ -113,7 +113,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		}
 		if !foundService {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService", serviceId)
+			log.Printf("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, preparedDepl)
 		}
 	}
 
@@ -158,7 +158,7 @@ func (this *Process) ProcessTeardown(token string) error {
 		} else {
 			if instances[0].State != "COMPLETED" {
 				this.metrics.UnexpectedProcessInstanceStateErr.Inc()
-				log.Println("ERROR: UnexpectedProcessInstanceStateErr")
+				log.Printf("ERROR: UnexpectedProcessInstanceStateErr %#v \n", instances)
 			} else {
 				this.metrics.ProcessInstanceDurationMs.Set(float64(instances[0].DurationInMillis))
 			}
