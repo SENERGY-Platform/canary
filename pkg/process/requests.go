@@ -186,13 +186,24 @@ func (this *Process) GetProcessInstances(token string) (result []ProcessInstance
 }
 
 //go:embed canary_process.bpmn
-var ProcessBpmn []byte
+var ProcessBpmn string
+
+//go:embed canary_process.svg
+var ProcessSvg string
 
 func (this *Process) PrepareProcessDeployment(token string) (result PreparedDeployment, err error) {
 	endpoint := this.config.ProcessDeploymentUrl + "/v3/prepared-deployments"
 	method := "POST"
 
-	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(ProcessBpmn))
+	msg, err := json.Marshal(map[string]interface{}{
+		"xml": ProcessBpmn,
+		"svg": ProcessSvg,
+	})
+	if err != nil {
+		return result, err
+	}
+
+	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(msg))
 	if err != nil {
 		return result, err
 	}

@@ -109,11 +109,11 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		}
 		if !foundDevice {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", err)
+			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", info.Id)
 		}
 		if !foundService {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService", err)
+			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService", serviceId)
 		}
 	}
 
