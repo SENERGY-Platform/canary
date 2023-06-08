@@ -17,6 +17,7 @@
 package process
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
@@ -113,7 +114,8 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		}
 		if !foundService {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Printf("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, preparedDepl)
+			temp, _ := json.Marshal(preparedDepl)
+			log.Printf("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, string(temp))
 		}
 	}
 
