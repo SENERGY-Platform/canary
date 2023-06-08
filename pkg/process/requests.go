@@ -115,7 +115,7 @@ func (this *Process) ListCanaryProcessDeployments(token string) (ids []string, e
 }
 
 func (this *Process) DeleteProcess(token string, deploymentId string) (err error) {
-	endpoint := this.config.ProcessDeploymentUrl + "/v2/deployments/" + url.PathEscape(deploymentId)
+	endpoint := this.config.ProcessDeploymentUrl + "/v3/deployments/" + url.PathEscape(deploymentId)
 	method := "DELETE"
 
 	req, err := http.NewRequest(method, endpoint, nil)
@@ -158,15 +158,6 @@ func (this *Process) StartProcess(token string, deploymentId string) (err error)
 	return nil
 }
 
-type ProcessInstance struct {
-	Id                    string `json:"id"`
-	ProcessDefinitionName string `json:"processDefinitionName"`
-	StartTime             string `json:"startTime"`
-	EndTime               string `json:"endTime"`
-	DurationInMillis      int    `json:"durationInMillis"`
-	State                 string `json:"state"`
-}
-
 func (this *Process) GetProcessInstances(token string) (result []ProcessInstance, err error) {
 	endpoint := this.config.ProcessEngineWrapperUrl + "/v2/history/process-instances?maxResults=20"
 	method := "GET"
@@ -185,6 +176,36 @@ func (this *Process) GetProcessInstances(token string) (result []ProcessInstance
 	if resp.StatusCode > 299 {
 		temp, _ := io.ReadAll(resp.Body) //read error response end ensure that resp.Body is read to EOF
 		return result, errors.New("unable to list process deployments: " + string(temp))
+	}
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	if err != nil {
+		_, _ = io.ReadAll(resp.Body) //ensure resp.Body is read to EOF
+		return result, err
+	}
+	return result, nil
+}
+
+//go:embed canary_process.bpmn
+var ProcessBpmn []byte
+
+func (this *Process) PrepareProcessDeployment(token string) (result PreparedDeployment, err error) {
+	endpoint := this.config.ProcessDeploymentUrl + "/v3/prepared-deployments"
+	method := "POST"
+
+	req, err := http.NewRequest(method, endpoint, bytes.NewBuffer(ProcessBpmn))
+	if err != nil {
+		return result, err
+	}
+	req.Header.Set("Authorization", token)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return result, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode > 299 {
+		temp, _ := io.ReadAll(resp.Body) //read error response end ensure that resp.Body is read to EOF
+		return result, errors.New("unable to deploy process: " + string(temp))
 	}
 	err = json.NewDecoder(resp.Body).Decode(&result)
 	if err != nil {

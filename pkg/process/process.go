@@ -85,6 +85,38 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		return errors.New("ProcessStartup(): no cmd service id found")
 	}
 
+	//check prepared deployment
+	preparedDepl, err := this.PrepareProcessDeployment(token)
+	if err != nil {
+		this.metrics.ProcessPreparedDeploymentErr.Inc()
+		log.Println("ERROR: ProcessPreparedDeploymentErr", err)
+	} else {
+		foundService := false
+		foundDevice := false
+		for _, e := range preparedDepl.Elements {
+			if e.BpmnId == "Task_0fa1ff0" && e.Task != nil {
+				for _, o := range e.Task.Selection.SelectionOptions {
+					if o.Device != nil && o.Device.Id != info.Id {
+						foundDevice = true
+					}
+					for _, s := range o.Services {
+						if s.Id != serviceId {
+							foundService = true
+						}
+					}
+				}
+			}
+		}
+		if !foundDevice {
+			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
+			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", err)
+		}
+		if !foundService {
+			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
+			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService", err)
+		}
+	}
+
 	deplId, err := this.DeployProcess(token, info.Id, serviceId)
 	if err != nil {
 		this.metrics.ProcessDeploymentErr.Inc()

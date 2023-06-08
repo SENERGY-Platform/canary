@@ -73,11 +73,13 @@ type Metrics struct {
 	UnexpectedNotificationStateErr             prometheus.Counter
 	UncategorizedErr                           prometheus.Counter
 
-	ProcessDeploymentErr               prometheus.Counter
-	ProcessStartErr                    prometheus.Counter
-	UnexpectedProcessInstanceStateErr  prometheus.Counter
-	ProcessUnexpectedCommandCountError prometheus.Counter
-	ProcessInstanceDurationMs          prometheus.Gauge
+	ProcessDeploymentErr                              prometheus.Counter
+	ProcessStartErr                                   prometheus.Counter
+	UnexpectedProcessInstanceStateErr                 prometheus.Counter
+	ProcessUnexpectedCommandCountError                prometheus.Counter
+	ProcessInstanceDurationMs                         prometheus.Gauge
+	ProcessPreparedDeploymentErr                      prometheus.Counter
+	ProcessUnexpectedPreparedDeploymentSelectablesErr prometheus.Counter
 }
 
 func NewMetrics(reg prometheus.Registerer) *Metrics {
@@ -243,7 +245,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_uncategorized_err",
 			Help: "total count of uncategorized errors since canary startup",
 		}),
-
 		ProcessDeploymentErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_process_deployment_err",
 			Help: "total count of process deployment errors since canary startup",
@@ -263,6 +264,14 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 		ProcessInstanceDurationMs: prometheus.NewGauge(prometheus.GaugeOpts{
 			Name: "canary_process_instance_duration_ms",
 			Help: "duration of process run in ms",
+		}),
+		ProcessPreparedDeploymentErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_process_prepared_deployment_err",
+			Help: "total count of prepared process errors since canary startup",
+		}),
+		ProcessUnexpectedPreparedDeploymentSelectablesErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_unexpected_prepared_deployment_selectables_err",
+			Help: "total count of prepared process selectable errors since canary startup",
 		}),
 	}
 
@@ -323,6 +332,8 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 	reg.MustRegister(m.UnexpectedProcessInstanceStateErr)
 	reg.MustRegister(m.ProcessUnexpectedCommandCountError)
 	reg.MustRegister(m.ProcessInstanceDurationMs)
+	reg.MustRegister(m.ProcessPreparedDeploymentErr)
+	reg.MustRegister(m.ProcessUnexpectedPreparedDeploymentSelectablesErr)
 
 	return m
 }
