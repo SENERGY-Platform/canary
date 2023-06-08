@@ -77,7 +77,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	}
 	serviceId := ""
 	for _, s := range dt.Services {
-		if s.LocalId == devicemetadata.SensorServiceLocalId {
+		if s.LocalId == devicemetadata.CmdServiceLocalId {
 			serviceId = s.Id
 			break
 		}
