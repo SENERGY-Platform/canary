@@ -77,7 +77,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	serviceId := ""
 	for _, s := range dt.Services {
 		if s.LocalId == devicemetadata.SensorServiceLocalId {
-			serviceId = s.LocalId
+			serviceId = s.Id
 			break
 		}
 	}
@@ -96,11 +96,11 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		for _, e := range preparedDepl.Elements {
 			if e.BpmnId == "Task_0fa1ff0" && e.Task != nil {
 				for _, o := range e.Task.Selection.SelectionOptions {
-					if o.Device != nil && o.Device.Id != info.Id {
+					if o.Device != nil && o.Device.Id == info.Id {
 						foundDevice = true
 					}
 					for _, s := range o.Services {
-						if s.Id != serviceId {
+						if s.Id == serviceId {
 							foundService = true
 						}
 					}
