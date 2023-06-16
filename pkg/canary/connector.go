@@ -39,6 +39,8 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 	go func() {
 		defer wg.Done()
 
+		eventDeplErr := this.events.ProcessStartup(token, info)
+
 		this.checkDeviceConnState(token, info, false)
 
 		hubId, err := this.ensureHub(token, info)
@@ -74,6 +76,10 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 		time.Sleep(this.getChangeGuaranteeDuration())
 
 		this.checkDeviceConnState(token, info, false)
+
+		if eventDeplErr == nil {
+			this.events.ProcessTeardown(token)
+		}
 
 	}()
 }

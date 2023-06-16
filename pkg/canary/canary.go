@@ -20,6 +20,7 @@ import (
 	"context"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
+	"github.com/SENERGY-Platform/canary/pkg/events"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	"github.com/SENERGY-Platform/canary/pkg/process"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
@@ -43,6 +44,7 @@ type Canary struct {
 	guaranteeChangeAfter time.Duration
 	devicerepo           devicerepo.Interface
 	process              Process
+	events               Event
 	devicemeta           *devicemetadata.DeviceMetaData
 }
 
@@ -56,7 +58,9 @@ func New(ctx context.Context, wg *sync.WaitGroup, config configuration.Config) (
 	permissions := client.NewClient(config.PermissionSearchUrl)
 	devicemeta := devicemetadata.NewDeviceMetaData(permissions, d, m, config, guaranteeChangeAfter)
 
-	p := process.NewProcess(config, d, m, guaranteeChangeAfter)
+	p := process.New(config, d, m, guaranteeChangeAfter)
+
+	e := events.New(config, d, m, guaranteeChangeAfter)
 
 	return &Canary{
 		reg:                  reg,
@@ -67,11 +71,17 @@ func New(ctx context.Context, wg *sync.WaitGroup, config configuration.Config) (
 		guaranteeChangeAfter: guaranteeChangeAfter,
 		devicemeta:           devicemeta,
 		process:              p,
+		events:               e,
 	}, nil
 }
 
 type Process interface {
 	NotifyCommand(topic string, payload []byte)
+	ProcessStartup(token string, info DeviceInfo) error
+	ProcessTeardown(token string) error
+}
+
+type Event interface {
 	ProcessStartup(token string, info DeviceInfo) error
 	ProcessTeardown(token string) error
 }
@@ -122,8 +132,6 @@ func (this *Canary) StartTests() {
 		this.testMetadata(wg, token, deviceInfo)
 
 		this.testNotification(wg, token)
-
-		//TODO: tests for device-selection, process-model-repo, process-deployment, process-execution
 
 		wg.Wait()
 

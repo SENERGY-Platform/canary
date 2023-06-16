@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package process
+package events
 
 import (
 	"encoding/json"
@@ -24,22 +24,20 @@ import (
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 	"log"
-	"sync/atomic"
 	"time"
 )
 
-type Process struct {
+type Events struct {
 	config               configuration.Config
 	devicerepo           devicerepo.Interface
 	guaranteeChangeAfter time.Duration
-	receivedCommands     atomic.Int64
 	metrics              *metrics.Metrics
 }
 
 type DeviceInfo = devicemetadata.DeviceInfo
 
-func New(config configuration.Config, devicerepo devicerepo.Interface, metrics *metrics.Metrics, guaranteeChangeAfter time.Duration) *Process {
-	return &Process{
+func New(config configuration.Config, devicerepo devicerepo.Interface, metrics *metrics.Metrics, guaranteeChangeAfter time.Duration) *Events {
+	return &Events{
 		config:               config,
 		devicerepo:           devicerepo,
 		guaranteeChangeAfter: guaranteeChangeAfter,
@@ -47,16 +45,15 @@ func New(config configuration.Config, devicerepo devicerepo.Interface, metrics *
 	}
 }
 
-func (this *Process) getChangeGuaranteeDuration() time.Duration {
+func (this *Events) getChangeGuaranteeDuration() time.Duration {
 	return this.guaranteeChangeAfter
 }
 
-func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
-	this.receivedCommands.Store(0)
+func (this *Events) ProcessStartup(token string, info DeviceInfo) error {
 	ids, err := this.ListCanaryProcessDeployments(token)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR: unexpected process deployment list count")
+		log.Println("ERROR: unexpected event process deployment list count")
 		return err
 	}
 	//cleanup
@@ -77,26 +74,26 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	}
 	serviceId := ""
 	for _, s := range dt.Services {
-		if s.LocalId == devicemetadata.CmdServiceLocalId {
+		if s.LocalId == devicemetadata.SensorServiceLocalId {
 			serviceId = s.Id
 			break
 		}
 	}
 	if serviceId == "" {
-		return errors.New("ProcessStartup(): no cmd service id found")
+		return errors.New("event no sensor service id found")
 	}
 
 	//check prepared deployment
 	preparedDepl, err := this.PrepareProcessDeployment(token)
 	if err != nil {
-		this.metrics.ProcessPreparedDeploymentErr.Inc()
-		log.Println("ERROR: ProcessPreparedDeploymentErr", err)
+		this.metrics.EventProcessPreparedDeploymentErr.Inc()
+		log.Println("ERROR: event EventProcessPreparedDeploymentErr", err)
 	} else {
 		foundService := false
 		foundDevice := false
 		for _, e := range preparedDepl.Elements {
-			if e.BpmnId == "Task_0fa1ff0" && e.Task != nil {
-				for _, o := range e.Task.Selection.SelectionOptions {
+			if e.BpmnId == "StartEvent_1" && e.ConditionalEvent != nil {
+				for _, o := range e.ConditionalEvent.Selection.SelectionOptions {
 					if o.Device != nil && o.Device.Id == info.Id {
 						foundDevice = true
 					}
@@ -109,36 +106,29 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 			}
 		}
 		if !foundDevice {
-			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", info.Id)
+			this.metrics.EventProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
+			log.Println("ERROR: EventProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", info.Id)
 		}
 		if !foundService {
-			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
+			this.metrics.EventProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
 			temp, _ := json.Marshal(preparedDepl)
-			log.Printf("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, string(temp))
+			log.Printf("ERROR: EventProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, string(temp))
 		}
 	}
 
-	deplId, err := this.DeployProcess(token, info.Id, serviceId)
+	_, err = this.DeployProcess(token, info.Id, serviceId)
 	if err != nil {
-		this.metrics.ProcessDeploymentErr.Inc()
-		log.Println("ERROR: ProcessDeploymentErr", err)
+		this.metrics.EventProcessDeploymentErr.Inc()
+		log.Println("ERROR: EventProcessDeploymentErr", err)
 		return err
 	}
 
 	time.Sleep(this.getChangeGuaranteeDuration())
 
-	err = this.StartProcess(token, deplId)
-	if err != nil {
-		this.metrics.ProcessStartErr.Inc()
-		log.Println("ERROR: ProcessStartErr", err)
-		return err
-	}
-
 	return nil
 }
 
-func (this *Process) ProcessTeardown(token string) error {
+func (this *Events) ProcessTeardown(token string) error {
 	ids, err := this.ListCanaryProcessDeployments(token)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
@@ -166,10 +156,10 @@ func (this *Process) ProcessTeardown(token string) error {
 			log.Println("ERROR: unexpected process instance list count")
 		} else {
 			if instances[0].State != "COMPLETED" {
-				this.metrics.UnexpectedProcessInstanceStateErr.Inc()
+				this.metrics.UnexpectedEventProcessInstanceStateErr.Inc()
 				log.Printf("ERROR: UnexpectedProcessInstanceStateErr %#v \n", instances)
 			} else {
-				this.metrics.ProcessInstanceDurationMs.Set(float64(instances[0].DurationInMillis))
+				this.metrics.EventProcessInstanceDurationMs.Set(float64(instances[0].DurationInMillis))
 			}
 		}
 	}
@@ -184,13 +174,5 @@ func (this *Process) ProcessTeardown(token string) error {
 		}
 	}
 
-	if this.receivedCommands.Load() == 0 {
-		this.metrics.ProcessUnexpectedCommandCountError.Inc()
-		log.Println("ERROR: ProcessUnexpectedCommandCountError", this.receivedCommands.Load())
-	}
 	return nil
-}
-
-func (this *Process) NotifyCommand(topic string, payload []byte) {
-	this.receivedCommands.Add(1)
 }

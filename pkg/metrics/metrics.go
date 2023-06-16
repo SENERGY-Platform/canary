@@ -80,6 +80,12 @@ type Metrics struct {
 	ProcessInstanceDurationMs                         prometheus.Gauge
 	ProcessPreparedDeploymentErr                      prometheus.Counter
 	ProcessUnexpectedPreparedDeploymentSelectablesErr prometheus.Counter
+
+	EventProcessDeploymentErr                              prometheus.Counter
+	UnexpectedEventProcessInstanceStateErr                 prometheus.Counter
+	EventProcessInstanceDurationMs                         prometheus.Gauge
+	EventProcessPreparedDeploymentErr                      prometheus.Counter
+	EventProcessUnexpectedPreparedDeploymentSelectablesErr prometheus.Counter
 }
 
 func NewMetrics(reg prometheus.Registerer) *Metrics {
@@ -273,6 +279,27 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_unexpected_prepared_deployment_selectables_err",
 			Help: "total count of prepared process selectable errors since canary startup",
 		}),
+
+		EventProcessDeploymentErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_event_process_deployment_err",
+			Help: "total count of process deployment errors since canary startup",
+		}),
+		UnexpectedEventProcessInstanceStateErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_event_process_instance_state_err",
+			Help: "total count of process instance state errors since canary startup",
+		}),
+		EventProcessInstanceDurationMs: prometheus.NewGauge(prometheus.GaugeOpts{
+			Name: "canary_event_process_instance_duration_ms",
+			Help: "duration of process run in ms",
+		}),
+		EventProcessPreparedDeploymentErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_event_process_prepared_deployment_err",
+			Help: "total count of prepared process errors since canary startup",
+		}),
+		EventProcessUnexpectedPreparedDeploymentSelectablesErr: prometheus.NewCounter(prometheus.CounterOpts{
+			Name: "canary_event_unexpected_prepared_deployment_selectables_err",
+			Help: "total count of prepared process selectable errors since canary startup",
+		}),
 	}
 
 	reg.MustRegister(m.AuthCount)
@@ -334,6 +361,12 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 	reg.MustRegister(m.ProcessInstanceDurationMs)
 	reg.MustRegister(m.ProcessPreparedDeploymentErr)
 	reg.MustRegister(m.ProcessUnexpectedPreparedDeploymentSelectablesErr)
+
+	reg.MustRegister(m.EventProcessDeploymentErr)
+	reg.MustRegister(m.UnexpectedEventProcessInstanceStateErr)
+	reg.MustRegister(m.EventProcessInstanceDurationMs)
+	reg.MustRegister(m.EventProcessPreparedDeploymentErr)
+	reg.MustRegister(m.EventProcessUnexpectedPreparedDeploymentSelectablesErr)
 
 	return m
 }

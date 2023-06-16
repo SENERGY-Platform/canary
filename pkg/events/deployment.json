@@ -1,0 +1,75 @@
+{
+    "id": "",
+    "name": "canary_event_process",
+    "description": "no description",
+    "diagram": {
+        "xml_raw": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<bpmn:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:senergy=\"https://senergy.infai.org\" xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\" id=\"Definitions_1\" targetNamespace=\"http://bpmn.io/schema/bpmn\"><bpmn:process id=\"canary_event_process\" isExecutable=\"true\"><bpmn:endEvent id=\"EndEvent_00jqyo5\"><bpmn:incoming>SequenceFlow_1vo1yfp</bpmn:incoming></bpmn:endEvent><bpmn:sequenceFlow id=\"SequenceFlow_1vo1yfp\" sourceRef=\"StartEvent_1\" targetRef=\"EndEvent_00jqyo5\" /><bpmn:startEvent id=\"StartEvent_1\" name=\"Get Temperature Degree Celsius&#10;value &#62;= 0\" senergy:aspect=\"urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6\" senergy:function=\"urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b\" senergy:characteristic=\"urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a\" senergy:script=\"value &#62;= 0\" senergy:value_variable_name=\"value\" senergy:qos=\"1\"><bpmn:outgoing>SequenceFlow_1vo1yfp</bpmn:outgoing><bpmn:messageEventDefinition /></bpmn:startEvent></bpmn:process><bpmndi:BPMNDiagram id=\"BPMNDiagram_1\"><bpmndi:BPMNPlane id=\"BPMNPlane_1\" bpmnElement=\"canary_event_process\"><bpmndi:BPMNShape id=\"EndEvent_00jqyo5_di\" bpmnElement=\"EndEvent_00jqyo5\"><dc:Bounds x=\"262\" y=\"102\" width=\"36\" height=\"36\" /></bpmndi:BPMNShape><bpmndi:BPMNEdge id=\"SequenceFlow_1vo1yfp_di\" bpmnElement=\"SequenceFlow_1vo1yfp\"><di:waypoint x=\"209\" y=\"120\" /><di:waypoint x=\"262\" y=\"120\" /></bpmndi:BPMNEdge><bpmndi:BPMNShape id=\"StartEvent_0rn836t_di\" bpmnElement=\"StartEvent_1\"><dc:Bounds x=\"173\" y=\"102\" width=\"36\" height=\"36\" /><bpmndi:BPMNLabel><dc:Bounds x=\"150\" y=\"145\" width=\"83\" height=\"40\" /></bpmndi:BPMNLabel></bpmndi:BPMNShape></bpmndi:BPMNPlane></bpmndi:BPMNDiagram></bpmn:definitions>",
+        "xml_deployed": "",
+        "svg": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!-- created with bpmn-js / http://bpmn.io -->\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" width=\"160\" height=\"95\" viewBox=\"144 96 160 95\" version=\"1.1\"><defs><marker id=\"sequenceflow-end-white-black-3zdssffv9ya4b56kycdubfbws\" viewBox=\"0 0 20 20\" refX=\"11\" refY=\"10\" markerWidth=\"10\" markerHeight=\"10\" orient=\"auto\"><path d=\"M 1 5 L 11 10 L 1 15 Z\" style=\"fill: black; stroke-width: 1px; stroke-linecap: round; stroke-dasharray: 10000, 1; stroke: black;\"/></marker></defs><g class=\"djs-group\"><g class=\"djs-element djs-connection\" data-element-id=\"SequenceFlow_1vo1yfp\" style=\"display: block;\"><g class=\"djs-visual\"><path d=\"m  209,120L262,120 \" style=\"fill: none; stroke-width: 2px; stroke: black; stroke-linejoin: round; marker-end: url('#sequenceflow-end-white-black-3zdssffv9ya4b56kycdubfbws');\"/></g><polyline points=\"209,120 262,120 \" class=\"djs-hit\" style=\"fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;\"/><rect x=\"203\" y=\"114\" width=\"65\" height=\"12\" class=\"djs-outline\" style=\"fill: none;\"/></g></g><g class=\"djs-group\"><g class=\"djs-element djs-shape\" data-element-id=\"EndEvent_00jqyo5\" transform=\"matrix(1 0 0 1 262 102)\" style=\"display: block;\"><g class=\"djs-visual\"><circle cx=\"18\" cy=\"18\" r=\"18\" style=\"stroke: black; stroke-width: 4px; fill: white; fill-opacity: 0.95;\"/></g><rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" class=\"djs-hit\" style=\"fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;\"/><rect x=\"-6\" y=\"-6\" width=\"48\" height=\"48\" class=\"djs-outline\" style=\"fill: none;\"/></g></g><g class=\"djs-group\"><g class=\"djs-element djs-shape\" data-element-id=\"StartEvent_1\" transform=\"matrix(1 0 0 1 173 102)\" style=\"display: block;\"><g class=\"djs-visual\"><circle cx=\"18\" cy=\"18\" r=\"18\" style=\"stroke: black; stroke-width: 2px; fill: white; fill-opacity: 0.95;\"/><path d=\"m 8.459999999999999,11.34 l 0,12.6 l 18.900000000000002,0 l 0,-12.6 z l 9.450000000000001,5.4 l 9.450000000000001,-5.4\" style=\"fill: white; stroke-width: 1px; stroke: black;\"/></g><rect x=\"0\" y=\"0\" width=\"36\" height=\"36\" class=\"djs-hit\" style=\"fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;\"/><rect x=\"-6\" y=\"-6\" width=\"48\" height=\"48\" class=\"djs-outline\" style=\"fill: none;\"/></g></g><g class=\"djs-group\"><g class=\"djs-element djs-shape\" data-element-id=\"StartEvent_1_label\" transform=\"matrix(1 0 0 1 150 145)\" style=\"display: block;\"><g class=\"djs-visual\"><text lineHeight=\"1.2\" class=\"djs-label\" style=\"font-family: Arial, sans-serif; font-size: 11px; font-weight: normal; fill: black;\"><tspan x=\"0\" y=\"9.899999999999999\">Get Temperature </tspan><tspan x=\"3.321533203125\" y=\"23.099999999999998\">Degree Celsius</tspan><tspan x=\"15.484375\" y=\"36.3\">value &gt;= 0</tspan></text></g><rect x=\"0\" y=\"0\" width=\"83\" height=\"40\" class=\"djs-hit\" style=\"fill: none; stroke-opacity: 0; stroke: white; stroke-width: 15px;\"/><rect x=\"-6\" y=\"-6\" width=\"95\" height=\"52\" class=\"djs-outline\" style=\"fill: none;\"/></g></g></svg>"
+    },
+    "elements": [
+        {
+            "bpmn_id": "StartEvent_1",
+            "group": null,
+            "name": "Get Temperature Degree Celsius\nvalue >= 0",
+            "order": 0,
+            "time_event": null,
+            "message_event": null,
+            "conditional_event": {
+                "script": "value >= 0",
+                "value_variable": "value",
+                "variables": {},
+                "qos": 1,
+                "event_id": "",
+                "selection": {
+                    "filter_criteria": {
+                        "characteristic_id": "urn:infai:ses:characteristic:5ba31623-0ccb-4488-bfb7-f73b50e03b5a",
+                        "function_id": "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b",
+                        "device_class_id": null,
+                        "aspect_id": "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6"
+                    },
+                    "selection_options": [],
+                    "selection_options_index": 0,
+                    "selected_device_id": "{{.DeviceId}}",
+                    "selected_service_id": "{{.ServiceId}}",
+                    "selected_device_group_id": null,
+                    "selected_import_id": null,
+                    "selected_path": {
+                        "path": "value",
+                        "characteristicId": "urn:infai:ses:characteristic:a49a48fc-3a2c-4149-ac7f-1a5482d4c6e1",
+                        "aspectNode": {
+                            "id": "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6",
+                            "name": "Air",
+                            "root_id": "urn:infai:ses:aspect:a14c5efb-b0b6-46c3-982e-9fded75b5ab6",
+                            "parent_id": "",
+                            "child_ids": [
+                                "urn:infai:ses:aspect:6eb3fb38-3592-4e2c-b2e2-5e303ddc55c0",
+                                "urn:infai:ses:aspect:f65876d6-77db-4123-b38b-f0eef5169378"
+                            ],
+                            "ancestor_ids": [],
+                            "descendent_ids": [
+                                "urn:infai:ses:aspect:6eb3fb38-3592-4e2c-b2e2-5e303ddc55c0",
+                                "urn:infai:ses:aspect:f65876d6-77db-4123-b38b-f0eef5169378"
+                            ]
+                        },
+                        "functionId": "urn:infai:ses:measuring-function:f2769eb9-b6ad-4f7e-bd28-e4ea043d2f8b",
+                        "isVoid": false,
+                        "value": null,
+                        "type": "https://schema.org/Integer",
+                        "configurables": []
+                    },
+                    "show": false
+                }
+            },
+            "notification": null,
+            "task": null
+        }
+    ],
+    "executable": true,
+    "version": 3,
+    "incident_handling": {
+        "restart": false,
+        "notify": true
+    },
+    "start_parameter": []
+}
