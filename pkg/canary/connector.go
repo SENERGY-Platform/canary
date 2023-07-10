@@ -112,6 +112,7 @@ func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expected
 		return
 	}
 	if result[0].Annotations["connected"] != expectedConnState {
+		log.Printf("Unexpected permissions device state: \n%#v != %#v\n", result[0].Annotations["connected"], expectedConnState)
 		if expectedConnState {
 			this.metrics.UnexpectedPermissionsDeviceOfflineStateErr.Inc()
 		} else {
