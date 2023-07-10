@@ -163,7 +163,7 @@ func (this *Process) ProcessTeardown(token string) error {
 	} else {
 		if len(instances) != 1 {
 			this.metrics.UncategorizedErr.Inc()
-			log.Println("ERROR: unexpected process instance list count")
+			log.Println("ERROR: unexpected process instance list count", len(instances))
 		} else {
 			if instances[0].State != "COMPLETED" {
 				this.metrics.UnexpectedProcessInstanceStateErr.Inc()
