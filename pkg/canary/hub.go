@@ -35,7 +35,7 @@ func (this *Canary) ensureHub(token string, device DeviceInfo) (hubId string, er
 	}
 	if len(canaryHubs) > 0 {
 		hub := canaryHubs[0]
-		if contains(hub.DeviceIds, device.Id) && len(hub.DeviceLocalIds) == 1 {
+		if contains(hub.DeviceIds, device.Id) && contains(hub.DeviceLocalIds, device.LocalId) {
 			return hub.Id, nil
 		} else {
 			err = this.updateCanaryHub(token, hub.Id, device)
