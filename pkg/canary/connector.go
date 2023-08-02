@@ -102,6 +102,7 @@ func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expected
 	})
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
+		log.Println("ERROR: checkDeviceConnState()", err)
 		this.metrics.PermissionsRequestErr.Inc()
 		return
 	}

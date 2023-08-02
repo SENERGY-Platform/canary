@@ -84,6 +84,7 @@ func (this *DeviceMetaData) ListCanaryDevices(token string) (devices []DeviceInf
 	this.metrics.PermissionsRequestCount.Inc()
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
+		log.Println("ERROR: ListCanaryDevices()", err)
 		this.metrics.PermissionsRequestErr.Inc()
 	}
 	return devices, err
