@@ -29,6 +29,6 @@ func Start(ctx context.Context, wg *sync.WaitGroup, config configuration.Config)
 	if err != nil {
 		return err
 	}
-	cmd.StartTests() //initial test
+	//cmd.StartTests() //initial test
 	return api.Start(ctx, config, cmd)
 }
