@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.0
 
 require (
-	github.com/SENERGY-Platform/device-repository v0.0.1
+	github.com/SENERGY-Platform/device-repository v0.0.2
 	github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38
 	github.com/SENERGY-Platform/permission-search v0.0.1
 	github.com/eclipse/paho.mqtt.golang v1.4.3
