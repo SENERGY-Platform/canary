@@ -55,7 +55,7 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 		return
 	}
 	this.metrics.DeviceMetaUpdateCount.Inc()
-	req, err := http.NewRequest(http.MethodPut, this.config.DeviceManagerUrl+"/devices/"+url.PathEscape(d.Id), buf)
+	req, err := http.NewRequest(http.MethodPut, this.config.DeviceManagerUrl+"/devices/"+url.PathEscape(d.Id)+"?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
 		log.Println("ERROR:", err)
@@ -71,8 +71,6 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-
-	time.Sleep(this.getChangeGuaranteeDuration()) //wait for cqrs
 
 	//check device-repo for name change
 	this.metrics.DeviceRepoRequestCount.Inc()

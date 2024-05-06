@@ -104,7 +104,7 @@ func (this *Canary) createCanaryHub(token string, device DeviceInfo) (hubId stri
 		return "", err
 	}
 	this.metrics.DeviceMetaUpdateCount.Inc()
-	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/hubs", buf)
+	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/hubs?wait=true", buf)
 	if err != nil {
 		return "", err
 	}
@@ -117,7 +117,6 @@ func (this *Canary) createCanaryHub(token string, device DeviceInfo) (hubId stri
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-	time.Sleep(this.getChangeGuaranteeDuration()) //ensure device is finished creating
 	return hub.Id, err
 }
 
@@ -134,7 +133,7 @@ func (this *Canary) updateCanaryHub(token string, hubId string, device DeviceInf
 		return err
 	}
 	this.metrics.DeviceMetaUpdateCount.Inc()
-	req, err := http.NewRequest(http.MethodPut, this.config.DeviceManagerUrl+"/hubs/"+url.PathEscape(hub.Id), buf)
+	req, err := http.NewRequest(http.MethodPut, this.config.DeviceManagerUrl+"/hubs/"+url.PathEscape(hub.Id)+"?wait=true", buf)
 	if err != nil {
 		return err
 	}
@@ -147,6 +146,5 @@ func (this *Canary) updateCanaryHub(token string, hubId string, device DeviceInf
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-	time.Sleep(this.getChangeGuaranteeDuration()) //ensure device is finished creating
 	return err
 }

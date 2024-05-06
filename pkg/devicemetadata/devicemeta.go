@@ -115,7 +115,7 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 		return device, err
 	}
 	this.metrics.DeviceMetaUpdateCount.Inc()
-	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/devices", buf)
+	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/devices?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
 		log.Println("ERROR:", err)
@@ -131,7 +131,6 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-	time.Sleep(this.getChangeGuaranteeDuration()) //ensure device is finished creating
 	return device, err
 }
 
@@ -236,7 +235,7 @@ func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType Dev
 		return deviceType, err
 	}
 	this.metrics.DeviceMetaUpdateCount.Inc()
-	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/device-types", buf)
+	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/device-types?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
 		log.Println("ERROR:", err)
@@ -252,7 +251,6 @@ func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType Dev
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-	time.Sleep(this.getChangeGuaranteeDuration()) //ensure device-type is finished creating
 	return deviceType, err
 }
 
