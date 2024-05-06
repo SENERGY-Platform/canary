@@ -74,6 +74,7 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 		this.disconnect(conn)
 
 		if eventDeplErr == nil {
+			time.Sleep(this.getChangeGuaranteeDuration())
 			this.events.ProcessTeardown(token)
 		}
 
