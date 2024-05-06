@@ -131,6 +131,7 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
+	time.Sleep(this.getChangeGuaranteeDuration())
 	return device, err
 }
 
@@ -251,6 +252,7 @@ func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType Dev
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
+	time.Sleep(this.getChangeGuaranteeDuration())
 	return deviceType, err
 }
 

@@ -72,6 +72,8 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 		debug.PrintStack()
 	}
 
+	time.Sleep(this.getChangeGuaranteeDuration())
+
 	//check device-repo for name change
 	this.metrics.DeviceRepoRequestCount.Inc()
 	start = time.Now()

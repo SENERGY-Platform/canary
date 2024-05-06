@@ -117,6 +117,7 @@ func (this *Canary) createCanaryHub(token string, device DeviceInfo) (hubId stri
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
+	time.Sleep(this.getChangeGuaranteeDuration())
 	return hub.Id, err
 }
 
@@ -146,5 +147,6 @@ func (this *Canary) updateCanaryHub(token string, hubId string, device DeviceInf
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
+	time.Sleep(this.getChangeGuaranteeDuration())
 	return err
 }
