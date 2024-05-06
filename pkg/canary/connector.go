@@ -65,21 +65,21 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 
 		this.checkDeviceConnState(token, info, true)
 
+		this.disconnect(conn)
+
 		this.checkDeviceValue(token, info, value)
 
 		if processErr == nil {
 			this.process.ProcessTeardown(token)
 		}
 
-		this.disconnect(conn)
-
 		time.Sleep(this.getChangeGuaranteeDuration())
-
-		this.checkDeviceConnState(token, info, false)
 
 		if eventDeplErr == nil {
 			this.events.ProcessTeardown(token)
 		}
+
+		this.checkDeviceConnState(token, info, false)
 
 	}()
 }
