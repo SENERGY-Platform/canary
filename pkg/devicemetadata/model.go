@@ -22,6 +22,7 @@ type DeviceInfo = models.Device
 type DeviceTypeInfo struct {
 	Id       string   `json:"id"`
 	Services []string `json:"service"`
+	OwnerId  string   `json:"owner_id"`
 }
 
 type PermDevice struct {

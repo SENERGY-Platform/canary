@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/SENERGY-Platform/device-repository v0.0.14
-	github.com/SENERGY-Platform/models/go v0.0.0-20230824080159-16585960df38
+	github.com/SENERGY-Platform/models/go v0.0.0-20240617111104-23d3c83dc312
 	github.com/SENERGY-Platform/permission-search v0.0.11
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/google/uuid v1.6.0

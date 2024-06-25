@@ -58,6 +58,8 @@ type Config struct {
 
 	CanaryProtocolSegmentName string `json:"canary_protocol_segment_name"`
 	CanaryHubName             string `json:"canary_hub_name"`
+
+	TopicsWithOwner bool `json:"topics_with_owner"`
 }
 
 // loads config from json in location and used environment variables (e.g KafkaUrl --> KAFKA_URL)

@@ -29,5 +29,7 @@
     "canary_protocol_segment_id": "urn:infai:ses:protocol-segment:0d211842-cef8-41ec-ab6b-9dbc31bc3a65",
     "canary_protocol_segment_name": "data",
 
-    "canary_hub_name": "canary"
+    "canary_hub_name": "canary",
+    
+    "topics_with_owner": false
 }
