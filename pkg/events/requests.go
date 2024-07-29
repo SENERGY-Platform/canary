@@ -131,7 +131,7 @@ func (this *Events) DeleteProcess(token string, deploymentId string) (err error)
 	defer resp.Body.Close()
 	if resp.StatusCode > 299 {
 		temp, _ := io.ReadAll(resp.Body) //read error response end ensure that resp.Body is read to EOF
-		return errors.New("unable to delete process instance: " + string(temp))
+		return errors.New("unable to delete event process: " + string(temp))
 	}
 	return nil
 }
