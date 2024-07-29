@@ -153,7 +153,7 @@ func (this *Process) StartProcess(token string, deploymentId string) (err error)
 	defer resp.Body.Close()
 	if resp.StatusCode > 299 {
 		temp, _ := io.ReadAll(resp.Body) //read error response end ensure that resp.Body is read to EOF
-		return errors.New("unable to delete process deployment: " + string(temp))
+		return errors.New("unable to start process: " + string(temp))
 	}
 	return nil
 }
