@@ -31,5 +31,5 @@
 
     "canary_hub_name": "canary",
     
-    "topics_with_owner": false
+    "topics_with_owner": true
 }
