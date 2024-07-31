@@ -32,9 +32,9 @@ type Config struct {
 	GuaranteeChangeAfter string `json:"guarantee_change_after"`
 
 	AuthEndpoint string `json:"auth_endpoint"`
-	AuthClientId string `json:"auth_client_id"`
-	AuthUsername string `json:"auth_username"`
-	AuthPassword string `json:"auth_password"`
+	AuthClientId string `json:"auth_client_id" config:"secret"`
+	AuthUsername string `json:"auth_username" config:"secret"`
+	AuthPassword string `json:"auth_password" config:"secret"`
 
 	PermissionSearchUrl     string `json:"permission_search_url"`
 	DeviceManagerUrl        string `json:"device_manager_url"`
