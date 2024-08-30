@@ -256,11 +256,12 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	}
 
 	buf := &bytes.Buffer{}
-	err = json.NewEncoder(buf).Encode([]map[string]interface{}{{
+	body := []map[string]interface{}{{
 		"deviceId":   info.Id,
 		"serviceId":  serviceId,
 		"columnName": "value",
-	}})
+	}}
+	err = json.NewEncoder(buf).Encode(body)
 	if err != nil {
 		return
 	}
@@ -279,6 +280,8 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	if err != nil {
 		this.metrics.DeviceDataRequestErr.Inc()
 		log.Println("ERROR:", err)
+		log.Printf("DEBUG: body=%#v\n", body)
+		log.Printf("DEBUG: dt=%#v\n", dt)
 		debug.PrintStack()
 	}
 
