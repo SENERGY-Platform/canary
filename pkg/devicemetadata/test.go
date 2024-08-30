@@ -20,8 +20,6 @@ import (
 	"bytes"
 	"encoding/json"
 	devicemodel "github.com/SENERGY-Platform/device-repository/lib/model"
-	"github.com/SENERGY-Platform/permission-search/lib/client"
-	"github.com/SENERGY-Platform/permission-search/lib/model"
 	"log"
 	"net/http"
 	"net/url"
@@ -94,31 +92,14 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	//check permission search for name change
 	this.metrics.PermissionsRequestCount.Inc()
 	start = time.Now()
-	permDevice, _, err := client.Query[[]PermDevice](this.permissions, token, client.QueryMessage{
-		Resource: "devices",
-		ListIds: &client.QueryListIds{
-			QueryListCommons: model.QueryListCommons{
-				Limit:  1,
-				Offset: 0,
-				Rights: "r",
-			},
-			Ids: []string{info.Id},
-		},
-	})
+	permDevice, err, _ := this.devicerepo.ReadDevice(info.Id, token, devicemodel.READ)
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.PermissionsRequestErr.Inc()
 		return
 	}
-	if len(permDevice) == 0 {
-		this.metrics.UncategorizedErr.Inc()
-		log.Printf("Unexpected conn state result: \n%#v\n", permDevice)
-		debug.PrintStack()
-		return
-	}
-
-	if permDevice[0].Name != d.Name {
+	if permDevice.Name != d.Name {
 		this.metrics.UnexpectedPermissionsMetadataErr.Inc()
-		log.Printf("UnexpectedDeviceRepoMetadataErr: %#v != %#v\n", permDevice[0].Name, d.Name)
+		log.Printf("UnexpectedDeviceRepoMetadataErr: %#v != %#v\n", permDevice.Name, d.Name)
 	}
 }

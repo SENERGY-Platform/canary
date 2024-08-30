@@ -20,8 +20,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
-	"github.com/SENERGY-Platform/permission-search/lib/client"
-	"github.com/SENERGY-Platform/permission-search/lib/model"
+	"github.com/SENERGY-Platform/device-repository/lib/model"
+	"github.com/SENERGY-Platform/models/go/models"
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"log"
 	"math/rand"
@@ -86,31 +86,15 @@ type PermDevice = devicemetadata.PermDevice
 func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expectedConnState bool) {
 	this.metrics.PermissionsRequestCount.Inc()
 	start := time.Now()
-	result, _, err := client.Query[[]PermDevice](this.permissions, token, client.QueryMessage{
-		Resource: "devices",
-		ListIds: &client.QueryListIds{
-			QueryListCommons: model.QueryListCommons{
-				Limit:  1,
-				Offset: 0,
-				Rights: "r",
-			},
-			Ids: []string{info.Id},
-		},
-	})
+	device, err, _ := this.devicerepo.ReadExtendedDevice(info.Id, token, model.READ)
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		log.Println("ERROR: checkDeviceConnState()", err)
 		this.metrics.PermissionsRequestErr.Inc()
 		return
 	}
-	if len(result) == 0 {
-		this.metrics.UncategorizedErr.Inc()
-		log.Printf("Unexpected conn state result: \n%#v\n", result)
-		debug.PrintStack()
-		return
-	}
-	if result[0].Annotations["connected"] != expectedConnState {
-		log.Printf("Unexpected permissions device state: annotation(%#v) != expected(%#v)\n", result[0].Annotations["connected"], expectedConnState)
+	if (device.ConnectionState == models.ConnectionStateOnline) != expectedConnState {
+		log.Printf("Unexpected device donnection-state: actual(%#v); expected(connected=%#v)\n", device.ConnectionState, expectedConnState)
 		if expectedConnState {
 			this.metrics.UnexpectedPermissionsDeviceOfflineStateErr.Inc()
 		} else {

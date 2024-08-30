@@ -23,8 +23,8 @@ import (
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
+	"github.com/SENERGY-Platform/device-repository/lib/model"
 	"github.com/SENERGY-Platform/models/go/models"
-	"github.com/SENERGY-Platform/permission-search/lib/client"
 	"github.com/google/uuid"
 	"io"
 	"log"
@@ -34,15 +34,14 @@ import (
 )
 
 type DeviceMetaData struct {
-	permissions          client.Client
 	devicerepo           devicerepo.Interface
 	metrics              *metrics.Metrics
 	config               configuration.Config
 	guaranteeChangeAfter time.Duration
 }
 
-func NewDeviceMetaData(permissions client.Client, devicerepo devicerepo.Interface, metrics *metrics.Metrics, config configuration.Config, guaranteeChangeAfter time.Duration) *DeviceMetaData {
-	return &DeviceMetaData{permissions: permissions, devicerepo: devicerepo, metrics: metrics, config: config, guaranteeChangeAfter: guaranteeChangeAfter}
+func NewDeviceMetaData(devicerepo devicerepo.Interface, metrics *metrics.Metrics, config configuration.Config, guaranteeChangeAfter time.Duration) *DeviceMetaData {
+	return &DeviceMetaData{devicerepo: devicerepo, metrics: metrics, config: config, guaranteeChangeAfter: guaranteeChangeAfter}
 }
 
 func (this *DeviceMetaData) getChangeGuaranteeDuration() time.Duration {
@@ -63,24 +62,7 @@ func (this *DeviceMetaData) EnsureDevice(token string) (device DeviceInfo, err e
 
 func (this *DeviceMetaData) ListCanaryDevices(token string) (devices []DeviceInfo, err error) {
 	start := time.Now()
-	devices, _, err = client.Query[[]DeviceInfo](this.permissions, token, client.QueryMessage{
-		Resource: "devices",
-		Find: &client.QueryFind{
-			QueryListCommons: client.QueryListCommons{
-				Limit:  1,
-				Offset: 0,
-				Rights: "r",
-				SortBy: "name",
-			},
-			Filter: &client.Selection{
-				Condition: client.ConditionConfig{
-					Feature:   "features.attributes.key",
-					Operation: client.QueryEqualOperation,
-					Value:     AttributeUsedForCanaryDevice,
-				},
-			},
-		},
-	})
+	devices, err, _ = this.devicerepo.ListDevices(token, model.DeviceListOptions{Limit: 1, AttributeKeys: []string{AttributeUsedForCanaryDevice}})
 	this.metrics.PermissionsRequestCount.Inc()
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
@@ -147,25 +129,13 @@ func (this *DeviceMetaData) EnsureDeviceType(token string) (result DeviceTypeInf
 	}
 }
 
-func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (dts []DeviceTypeInfo, err error) {
+func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (result []DeviceTypeInfo, err error) {
 	start := time.Now()
-	dts, _, err = client.Query[[]DeviceTypeInfo](this.permissions, token, client.QueryMessage{
-		Resource: "device-types",
-		Find: &client.QueryFind{
-			QueryListCommons: client.QueryListCommons{
-				Limit:  1,
-				Offset: 0,
-				Rights: "r",
-				SortBy: "name",
-			},
-			Filter: &client.Selection{
-				Condition: client.ConditionConfig{
-					Feature:   "features.attributes.key",
-					Operation: client.QueryEqualOperation,
-					Value:     AttributeUsedForCanaryDeviceType,
-				},
-			},
-		},
+	deviceTypes, err, _ := this.devicerepo.ListDeviceTypesV3(token, model.DeviceTypeListOptions{
+		Limit:         1,
+		Offset:        0,
+		SortBy:        "name",
+		AttributeKeys: []string{AttributeUsedForCanaryDeviceType},
 	})
 	this.metrics.PermissionsRequestCount.Inc()
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
@@ -174,7 +144,17 @@ func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (dts []DeviceTyp
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}
-	return dts, err
+	for _, dt := range deviceTypes {
+		services := []string{}
+		for _, s := range dt.Services {
+			services = append(services, s.Id)
+		}
+		result = append(result, DeviceTypeInfo{
+			Id:       dt.Id,
+			Services: services,
+		})
+	}
+	return result, err
 }
 
 func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType DeviceTypeInfo, err error) {

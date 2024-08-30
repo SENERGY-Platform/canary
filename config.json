@@ -8,7 +8,6 @@
     "auth_username": "",
     "auth_password": "",
 
-    "permission_search_url": "https://api.senergy.infai.org/permissions/query",
     "device_manager_url": "https://api.senergy.infai.org/device-manager",
     "device_repository_url": "https://api.senergy.infai.org/device-repository",
     "connector_mqtt_broker_url": "tcp://connector.senergy.infai.org:2883",

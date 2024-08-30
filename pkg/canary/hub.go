@@ -20,7 +20,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
-	"github.com/SENERGY-Platform/permission-search/lib/client"
+	"github.com/SENERGY-Platform/device-repository/lib/client"
 	"log"
 	"net/http"
 	"net/url"
@@ -64,23 +64,10 @@ type HubInfo struct {
 
 func (this *Canary) listCanaryHubs(token string) (hubs []HubInfo, err error) {
 	start := time.Now()
-	hubs, _, err = client.Query[[]HubInfo](this.permissions, token, client.QueryMessage{
-		Resource: "hubs",
-		Find: &client.QueryFind{
-			QueryListCommons: client.QueryListCommons{
-				Limit:  1,
-				Offset: 0,
-				Rights: "w",
-				SortBy: "name",
-			},
-			Filter: &client.Selection{
-				Condition: client.ConditionConfig{
-					Feature:   "features.name",
-					Operation: client.QueryEqualOperation,
-					Value:     this.config.CanaryHubName,
-				},
-			},
-		},
+	temp, err, _ := this.devicerepo.ListHubs(token, client.HubListOptions{
+		Search: this.config.CanaryHubName,
+		Limit:  1,
+		Offset: 0,
 	})
 	this.metrics.PermissionsRequestCount.Inc()
 	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
@@ -88,6 +75,15 @@ func (this *Canary) listCanaryHubs(token string) (hubs []HubInfo, err error) {
 		this.metrics.PermissionsRequestErr.Inc()
 		log.Println("ERROR:", err)
 		debug.PrintStack()
+		return hubs, err
+	}
+	for _, hub := range temp {
+		hubs = append(hubs, HubInfo{
+			Id:             hub.Id,
+			Name:           hub.Name,
+			DeviceIds:      hub.DeviceIds,
+			DeviceLocalIds: hub.DeviceLocalIds,
+		})
 	}
 	return hubs, err
 }

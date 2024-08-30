@@ -36,7 +36,6 @@ type Config struct {
 	AuthUsername string `json:"auth_username" config:"secret"`
 	AuthPassword string `json:"auth_password" config:"secret"`
 
-	PermissionSearchUrl     string `json:"permission_search_url"`
 	DeviceManagerUrl        string `json:"device_manager_url"`
 	DeviceRepositoryUrl     string `json:"device_repository_url"`
 	ConnectorMqttBrokerUrl  string `json:"connector_mqtt_broker_url"`
