@@ -207,12 +207,12 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Help: "total count of notification delete errors since canary startup",
 		}),
 		UnexpectedDeviceOnlineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "canary_unexpected_permissions_device_online_state_err",
-			Help: "total count of unexpected permission device online state errors since canary startup",
+			Name: "canary_unexpected_device_online_state_err",
+			Help: "total count of unexpected device online state errors since canary startup",
 		}),
 		UnexpectedDeviceOfflineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "canary_unexpected_permissions_device_offline_state_err",
-			Help: "total count of unexpected permission device offline state errors since canary startup",
+			Name: "canary_unexpected_device_offline_state_err",
+			Help: "total count of unexpected device offline state errors since canary startup",
 		}),
 		UnexpectedDeviceRepoMetadataErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_unexpected_device_repo_metadata_err",
