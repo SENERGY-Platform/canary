@@ -84,21 +84,21 @@ func (this *Canary) testDeviceConnection(wg *sync.WaitGroup, token string, info 
 type PermDevice = devicemetadata.PermDevice
 
 func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expectedConnState bool) {
-	this.metrics.PermissionsRequestCount.Inc()
+	this.metrics.DeviceRepoRequestCount.Inc()
 	start := time.Now()
 	device, err, _ := this.devicerepo.ReadExtendedDevice(info.Id, token, model.READ)
-	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
+	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		log.Println("ERROR: checkDeviceConnState()", err)
-		this.metrics.PermissionsRequestErr.Inc()
+		this.metrics.DeviceRepoRequestErr.Inc()
 		return
 	}
 	if (device.ConnectionState == models.ConnectionStateOnline) != expectedConnState {
 		log.Printf("Unexpected device donnection-state: actual(%#v); expected(connected=%#v)\n", device.ConnectionState, expectedConnState)
 		if expectedConnState {
-			this.metrics.UnexpectedPermissionsDeviceOfflineStateErr.Inc()
+			this.metrics.UnexpectedDeviceOfflineStateErr.Inc()
 		} else {
-			this.metrics.UnexpectedPermissionsDeviceOnlineStateErr.Inc()
+			this.metrics.UnexpectedDeviceOnlineStateErr.Inc()
 		}
 	}
 }

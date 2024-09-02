@@ -69,10 +69,10 @@ func (this *Canary) listCanaryHubs(token string) (hubs []HubInfo, err error) {
 		Limit:  1,
 		Offset: 0,
 	})
-	this.metrics.PermissionsRequestCount.Inc()
-	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
+	this.metrics.DeviceRepoRequestCount.Inc()
+	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		this.metrics.PermissionsRequestErr.Inc()
+		this.metrics.DeviceRepoRequestErr.Inc()
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 		return hubs, err

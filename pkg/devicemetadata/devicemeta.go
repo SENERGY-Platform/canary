@@ -63,11 +63,11 @@ func (this *DeviceMetaData) EnsureDevice(token string) (device DeviceInfo, err e
 func (this *DeviceMetaData) ListCanaryDevices(token string) (devices []DeviceInfo, err error) {
 	start := time.Now()
 	devices, err, _ = this.devicerepo.ListDevices(token, model.DeviceListOptions{Limit: 1, AttributeKeys: []string{AttributeUsedForCanaryDevice}})
-	this.metrics.PermissionsRequestCount.Inc()
-	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
+	this.metrics.DeviceRepoRequestCount.Inc()
+	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		log.Println("ERROR: ListCanaryDevices()", err)
-		this.metrics.PermissionsRequestErr.Inc()
+		this.metrics.DeviceRepoRequestErr.Inc()
 	}
 	return devices, err
 }
@@ -137,10 +137,10 @@ func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (result []Device
 		SortBy:        "name",
 		AttributeKeys: []string{AttributeUsedForCanaryDeviceType},
 	})
-	this.metrics.PermissionsRequestCount.Inc()
-	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
+	this.metrics.DeviceRepoRequestCount.Inc()
+	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		this.metrics.PermissionsRequestErr.Inc()
+		this.metrics.DeviceRepoRequestErr.Inc()
 		log.Println("ERROR:", err)
 		debug.PrintStack()
 	}

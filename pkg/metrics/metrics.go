@@ -33,10 +33,6 @@ type Metrics struct {
 	DeviceRepoRequestLatencyMs prometheus.Gauge
 	DeviceRepoRequestErr       prometheus.Counter
 
-	PermissionsRequestCount     prometheus.Counter
-	PermissionsRequestLatencyMs prometheus.Gauge
-	PermissionsRequestErr       prometheus.Counter
-
 	DeviceDataRequestCount     prometheus.Counter
 	DeviceDataRequestLatencyMs prometheus.Gauge
 	DeviceDataRequestErr       prometheus.Counter
@@ -65,13 +61,12 @@ type Metrics struct {
 	NotificationDeleteLatencyMs prometheus.Gauge
 	NotificationDeleteErr       prometheus.Counter
 
-	UnexpectedPermissionsDeviceOnlineStateErr  prometheus.Counter
-	UnexpectedPermissionsDeviceOfflineStateErr prometheus.Counter
-	UnexpectedPermissionsMetadataErr           prometheus.Counter
-	UnexpectedDeviceRepoMetadataErr            prometheus.Counter
-	UnexpectedDeviceDataErr                    prometheus.Counter
-	UnexpectedNotificationStateErr             prometheus.Counter
-	UncategorizedErr                           prometheus.Counter
+	UnexpectedDeviceOnlineStateErr  prometheus.Counter
+	UnexpectedDeviceOfflineStateErr prometheus.Counter
+	UnexpectedDeviceRepoMetadataErr prometheus.Counter
+	UnexpectedDeviceDataErr         prometheus.Counter
+	UnexpectedNotificationStateErr  prometheus.Counter
+	UncategorizedErr                prometheus.Counter
 
 	ProcessDeploymentErr                              prometheus.Counter
 	ProcessStartErr                                   prometheus.Counter
@@ -126,18 +121,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 		DeviceRepoRequestErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_device_repo_request_update_err",
 			Help: "total count of device repo request errors since canary startup",
-		}),
-		PermissionsRequestCount: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "canary_permissions_request_count",
-			Help: countHelpMsg,
-		}),
-		PermissionsRequestLatencyMs: prometheus.NewGauge(prometheus.GaugeOpts{
-			Name: "canary_permissions_request_latency_ms",
-			Help: "latency of permissions request",
-		}),
-		PermissionsRequestErr: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "canary_permissions_request_update_err",
-			Help: "total count of permissions request errors since canary startup",
 		}),
 		DeviceDataRequestCount: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_device_data_request_count",
@@ -223,17 +206,13 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 			Name: "canary_notification_delete_err",
 			Help: "total count of notification delete errors since canary startup",
 		}),
-		UnexpectedPermissionsDeviceOnlineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
+		UnexpectedDeviceOnlineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_unexpected_permissions_device_online_state_err",
 			Help: "total count of unexpected permission device online state errors since canary startup",
 		}),
-		UnexpectedPermissionsDeviceOfflineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
+		UnexpectedDeviceOfflineStateErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_unexpected_permissions_device_offline_state_err",
 			Help: "total count of unexpected permission device offline state errors since canary startup",
-		}),
-		UnexpectedPermissionsMetadataErr: prometheus.NewCounter(prometheus.CounterOpts{
-			Name: "canary_unexpected_permissions_metadata_err",
-			Help: "total count of unexpected permission metadata value errors since canary startup",
 		}),
 		UnexpectedDeviceRepoMetadataErr: prometheus.NewCounter(prometheus.CounterOpts{
 			Name: "canary_unexpected_device_repo_metadata_err",
@@ -314,10 +293,6 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 	reg.MustRegister(m.DeviceRepoRequestLatencyMs)
 	reg.MustRegister(m.DeviceRepoRequestErr)
 
-	reg.MustRegister(m.PermissionsRequestCount)
-	reg.MustRegister(m.PermissionsRequestLatencyMs)
-	reg.MustRegister(m.PermissionsRequestErr)
-
 	reg.MustRegister(m.DeviceDataRequestCount)
 	reg.MustRegister(m.DeviceDataRequestLatencyMs)
 	reg.MustRegister(m.DeviceDataRequestErr)
@@ -346,9 +321,8 @@ func NewMetrics(reg prometheus.Registerer) *Metrics {
 	reg.MustRegister(m.NotificationDeleteLatencyMs)
 	reg.MustRegister(m.NotificationDeleteErr)
 
-	reg.MustRegister(m.UnexpectedPermissionsDeviceOnlineStateErr)
-	reg.MustRegister(m.UnexpectedPermissionsDeviceOfflineStateErr)
-	reg.MustRegister(m.UnexpectedPermissionsMetadataErr)
+	reg.MustRegister(m.UnexpectedDeviceOnlineStateErr)
+	reg.MustRegister(m.UnexpectedDeviceOfflineStateErr)
 	reg.MustRegister(m.UnexpectedDeviceRepoMetadataErr)
 	reg.MustRegister(m.UnexpectedDeviceDataErr)
 	reg.MustRegister(m.UnexpectedNotificationStateErr)

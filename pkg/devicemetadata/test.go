@@ -88,18 +88,4 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 		this.metrics.UnexpectedDeviceRepoMetadataErr.Inc()
 		log.Printf("UnexpectedDeviceRepoMetadataErr: %#v != %#v\n", repoDevice.Name, d.Name)
 	}
-
-	//check permission search for name change
-	this.metrics.PermissionsRequestCount.Inc()
-	start = time.Now()
-	permDevice, err, _ := this.devicerepo.ReadDevice(info.Id, token, devicemodel.READ)
-	this.metrics.PermissionsRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
-	if err != nil {
-		this.metrics.PermissionsRequestErr.Inc()
-		return
-	}
-	if permDevice.Name != d.Name {
-		this.metrics.UnexpectedPermissionsMetadataErr.Inc()
-		log.Printf("UnexpectedDeviceRepoMetadataErr: %#v != %#v\n", permDevice.Name, d.Name)
-	}
 }
