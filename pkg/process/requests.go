@@ -24,6 +24,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 	"text/template"
 )
 
@@ -81,7 +82,27 @@ type Wrapper struct {
 const ExpectedCanaryDeploymentName = "canary_process"
 
 func (this *Process) ListCanaryProcessDeployments(token string) (ids []string, err error) {
-	endpoint := this.config.ProcessEngineWrapperUrl + "/v2/deployments"
+	limit := 200
+	offset := 0
+	for {
+		sub, err := this.listCanaryProcessDeployments(token, limit, offset)
+		if err != nil {
+			return ids, err
+		}
+		ids = append(ids, sub...)
+		if len(sub) < limit {
+			return ids, nil
+		}
+		offset = limit + offset
+	}
+}
+
+func (this *Process) listCanaryProcessDeployments(token string, limit int, offset int) (ids []string, err error) {
+	query := url.Values{"maxResults": {strconv.Itoa(limit)}}
+	if offset > 0 {
+		query.Set("firstResult", strconv.Itoa(offset))
+	}
+	endpoint := this.config.ProcessEngineWrapperUrl + "/v2/deployments?" + query.Encode()
 	method := "GET"
 
 	wrapper := []Wrapper{}
