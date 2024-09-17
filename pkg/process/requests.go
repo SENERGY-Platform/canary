@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -94,6 +95,7 @@ func (this *Process) ListCanaryProcessDeployments(token string) (ids []string, e
 			return ids, nil
 		}
 		offset = limit + offset
+		log.Println("ListCanaryProcessDeployments offset =", offset)
 	}
 }
 
