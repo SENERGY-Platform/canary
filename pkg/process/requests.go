@@ -90,7 +90,11 @@ func (this *Process) ListCanaryProcessDeployments(token string) (ids []string, e
 		if err != nil {
 			return ids, err
 		}
-		ids = append(ids, sub...)
+		for _, w := range sub {
+			if w.Name == ExpectedCanaryDeploymentName {
+				ids = append(ids, w.Id)
+			}
+		}
 		if len(sub) < limit {
 			return ids, nil
 		}
@@ -99,7 +103,7 @@ func (this *Process) ListCanaryProcessDeployments(token string) (ids []string, e
 	}
 }
 
-func (this *Process) listCanaryProcessDeployments(token string, limit int, offset int) (ids []string, err error) {
+func (this *Process) listCanaryProcessDeployments(token string, limit int, offset int) (wrappers []Wrapper, err error) {
 	query := url.Values{"maxResults": {strconv.Itoa(limit)}}
 	if offset > 0 {
 		query.Set("firstResult", strconv.Itoa(offset))
@@ -107,34 +111,27 @@ func (this *Process) listCanaryProcessDeployments(token string, limit int, offse
 	endpoint := this.config.ProcessEngineWrapperUrl + "/v2/deployments?" + query.Encode()
 	method := "GET"
 
-	wrapper := []Wrapper{}
-
 	req, err := http.NewRequest(method, endpoint, nil)
 	if err != nil {
-		return ids, err
+		return wrappers, err
 	}
 	req.Header.Set("Authorization", token)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return ids, err
+		return wrappers, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode > 299 {
 		temp, _ := io.ReadAll(resp.Body) //read error response end ensure that resp.Body is read to EOF
-		return ids, errors.New("unable to list process deployments: " + string(temp))
+		return wrappers, errors.New("unable to list process deployments: " + string(temp))
 	}
-	err = json.NewDecoder(resp.Body).Decode(&wrapper)
+	err = json.NewDecoder(resp.Body).Decode(&wrappers)
 	if err != nil {
 		_, _ = io.ReadAll(resp.Body) //ensure resp.Body is read to EOF
-		return ids, err
+		return wrappers, err
 	}
-	for _, w := range wrapper {
-		if w.Name == ExpectedCanaryDeploymentName {
-			ids = append(ids, w.Id)
-		}
-	}
-	return ids, nil
+	return wrappers, nil
 }
 
 func (this *Process) DeleteProcess(token string, deploymentId string) (err error) {
