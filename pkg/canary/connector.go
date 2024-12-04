@@ -86,7 +86,7 @@ type PermDevice = devicemetadata.PermDevice
 func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expectedConnState bool) {
 	this.metrics.DeviceRepoRequestCount.Inc()
 	start := time.Now()
-	device, err, _ := this.devicerepo.ReadExtendedDevice(info.Id, token, model.READ)
+	device, err, _ := this.devicerepo.ReadExtendedDevice(info.Id, token, model.READ, false)
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		log.Println("ERROR: checkDeviceConnState()", err)
