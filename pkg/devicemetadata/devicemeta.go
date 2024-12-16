@@ -131,7 +131,7 @@ func (this *DeviceMetaData) EnsureDeviceType(token string) (result DeviceTypeInf
 
 func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (result []DeviceTypeInfo, err error) {
 	start := time.Now()
-	deviceTypes, err, _ := this.devicerepo.ListDeviceTypesV3(token, model.DeviceTypeListOptions{
+	deviceTypes, _, err, _ := this.devicerepo.ListDeviceTypesV3(token, model.DeviceTypeListOptions{
 		Limit:         1,
 		Offset:        0,
 		SortBy:        "name",
