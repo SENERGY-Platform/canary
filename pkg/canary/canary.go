@@ -52,7 +52,7 @@ func New(ctx context.Context, wg *sync.WaitGroup, config configuration.Config) (
 
 	m := metrics.NewMetrics(reg)
 
-	d := devicerepo.NewClient(config.DeviceRepositoryUrl)
+	d := devicerepo.NewClient(config.DeviceRepositoryUrl, nil)
 	devicemeta := devicemetadata.NewDeviceMetaData(d, m, config, guaranteeChangeAfter)
 
 	p := process.New(config, d, m, guaranteeChangeAfter)
