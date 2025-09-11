@@ -1,5 +1,5 @@
 .idea
 canary
-
+!canary/
 cert.pem
 key.pem
