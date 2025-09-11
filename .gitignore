@@ -1,2 +1,5 @@
 .idea
 canary
+
+cert.pem
+key.pem

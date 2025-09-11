@@ -59,6 +59,12 @@ type Config struct {
 	CanaryHubName             string `json:"canary_hub_name"`
 
 	TopicsWithOwner bool `json:"topics_with_owner"`
+
+	UseCert          bool   `json:"use_cert"`
+	CertAuthorityUrl string `json:"cert_authority_url"`
+	CertKeyFilePath  string `json:"cert_key_file_path"`
+	CertFilePath     string `json:"cert_file_path"`
+	CertExpTime      string `json:"cert_exp_time"`
 }
 
 // loads config from json in location and used environment variables (e.g KafkaUrl --> KAFKA_URL)

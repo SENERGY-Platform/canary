@@ -18,6 +18,11 @@ package canary
 
 import (
 	"context"
+	"log"
+	"net/http"
+	"sync"
+	"time"
+
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/canary/pkg/events"
@@ -26,10 +31,6 @@ import (
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"log"
-	"net/http"
-	"sync"
-	"time"
 )
 
 type Canary struct {

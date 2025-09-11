@@ -10,7 +10,7 @@
 
     "device_manager_url": "https://api.senergy.infai.org/device-manager",
     "device_repository_url": "https://api.senergy.infai.org/device-repository",
-    "connector_mqtt_broker_url": "tcp://connector.senergy.infai.org:2883",
+    "connector_mqtt_broker_url": "tls://certconnector.senergy.infai.org:28888",
     "last_value_query_url": "https://api.senergy.infai.org/db/v3/last-values",
     "notification_url": "https://api.senergy.infai.org/notifications-v2",
     "process_deployment_url": "https://api.senergy.infai.org/process/deployment",
@@ -30,5 +30,11 @@
 
     "canary_hub_name": "canary",
     
-    "topics_with_owner": true
+    "topics_with_owner": true,
+
+    "use_cert": true,
+    "cert_authority_url": "https://api.senergy.infai.org/ca",
+    "cert_key_file_path": "./key.pem",
+    "cert_file_path":"./cert.pem",
+    "cert_exp_time": "8760h"
 }
