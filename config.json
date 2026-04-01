@@ -36,5 +36,7 @@
     "cert_authority_url": "https://api.senergy.infai.org/ca",
     "cert_key_file_path": "./key.pem",
     "cert_file_path":"./cert.pem",
-    "cert_exp_time": "8760h"
+    "cert_exp_time": "8760h",
+
+    "log_level": "info"
 }

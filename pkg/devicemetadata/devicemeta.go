@@ -20,17 +20,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"net/http"
+	"runtime/debug"
+	"time"
+
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
 	"github.com/SENERGY-Platform/device-repository/lib/model"
 	"github.com/SENERGY-Platform/models/go/models"
 	"github.com/google/uuid"
-	"io"
-	"log"
-	"net/http"
-	"runtime/debug"
-	"time"
 )
 
 type DeviceMetaData struct {
@@ -66,7 +66,7 @@ func (this *DeviceMetaData) ListCanaryDevices(token string) (devices []DeviceInf
 	this.metrics.DeviceRepoRequestCount.Inc()
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		log.Println("ERROR: ListCanaryDevices()", err)
+		this.config.GetLogger().Error("unable to list devices", "error", err)
 		this.metrics.DeviceRepoRequestErr.Inc()
 	}
 	return devices, err
@@ -92,7 +92,7 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 	err = json.NewEncoder(buf).Encode(device)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 		return device, err
 	}
@@ -100,7 +100,7 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/devices?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 		return device, err
 	}
@@ -110,7 +110,7 @@ func (this *DeviceMetaData) CreateCanaryDevice(token string) (device DeviceInfo,
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 	}
 	time.Sleep(this.getChangeGuaranteeDuration())
@@ -141,7 +141,7 @@ func (this *DeviceMetaData) ListCanaryDeviceTypes(token string) (result []Device
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceRepoRequestErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to list device-types", "error", err)
 		debug.PrintStack()
 	}
 	for _, dt := range deviceTypes {
@@ -219,7 +219,7 @@ func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType Dev
 	req, err := http.NewRequest(http.MethodPost, this.config.DeviceManagerUrl+"/device-types?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device-type", "error", err)
 		debug.PrintStack()
 		return deviceType, err
 	}
@@ -229,7 +229,7 @@ func (this *DeviceMetaData) CreateCanaryDeviceType(token string) (deviceType Dev
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device-type", "error", err)
 		debug.PrintStack()
 	}
 	time.Sleep(this.getChangeGuaranteeDuration())

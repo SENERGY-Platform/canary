@@ -19,12 +19,12 @@ package devicemetadata
 import (
 	"bytes"
 	"encoding/json"
-	devicemodel "github.com/SENERGY-Platform/device-repository/lib/model"
-	"log"
 	"net/http"
 	"net/url"
 	"runtime/debug"
 	"time"
+
+	devicemodel "github.com/SENERGY-Platform/device-repository/lib/model"
 )
 
 func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
@@ -35,7 +35,7 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceRepoRequestErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to read device", "error", err)
 		debug.PrintStack()
 		return
 	}
@@ -48,7 +48,7 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	err = json.NewEncoder(buf).Encode(d)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 		return
 	}
@@ -56,7 +56,7 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	req, err := http.NewRequest(http.MethodPut, this.config.DeviceManagerUrl+"/devices/"+url.PathEscape(d.Id)+"?wait=true", buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 		return
 	}
@@ -66,7 +66,7 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create device", "error", err)
 		debug.PrintStack()
 	}
 
@@ -79,13 +79,13 @@ func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceRepoRequestErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to read device", "error", err)
 		debug.PrintStack()
 		return
 	}
 
 	if repoDevice.Name != d.Name {
 		this.metrics.UnexpectedDeviceRepoMetadataErr.Inc()
-		log.Printf("UnexpectedDeviceRepoMetadataErr: %#v != %#v\n", repoDevice.Name, d.Name)
+		this.config.GetLogger().Error("unexpected device-repo metadata", "expected", d.Name, "actual", repoDevice.Name)
 	}
 }

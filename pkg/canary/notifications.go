@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -58,7 +57,7 @@ func (this *Canary) testNotification(wg *sync.WaitGroup, token string) {
 
 		if !found {
 			this.metrics.UnexpectedNotificationStateErr.Inc()
-			log.Printf("UnexpectedNotificationStateErr: %#v\n", found)
+			this.config.GetLogger().Error("UnexpectedNotificationStateErr")
 		}
 
 		err = this.deleteNotifications(token, ids)
@@ -103,7 +102,7 @@ func (this *Canary) sendNotification(token string, text string) (err error) {
 	}
 	req, err := http.NewRequest("POST", this.config.NotificationUrl+"/notifications", b)
 	if err != nil {
-		log.Println("ERROR: unable to send notification", err)
+		this.config.GetLogger().Error("unable to send notification", "error", err)
 		return err
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -116,7 +115,7 @@ func (this *Canary) sendNotification(token string, text string) (err error) {
 	resp, err := http.DefaultClient.Do(req)
 	this.metrics.NotificationPublishLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		log.Println("ERROR: unable to send notification", err)
+		this.config.GetLogger().Error("unable to send notification", "error", err)
 		this.metrics.NotificationPublishErr.Inc()
 		return err
 	}
@@ -124,7 +123,7 @@ func (this *Canary) sendNotification(token string, text string) (err error) {
 	respMsg, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		this.metrics.NotificationPublishErr.Inc()
-		log.Println("ERROR: unexpected response status from notifier", resp.StatusCode, string(respMsg))
+		this.config.GetLogger().Error("unexpected response status from notifier", "status-code", resp.StatusCode, "error", string(respMsg))
 		return errors.New("unexpected response status from notifier " + resp.Status)
 	}
 	return nil
@@ -133,7 +132,7 @@ func (this *Canary) sendNotification(token string, text string) (err error) {
 func (this *Canary) getNotifications(token string) (result []Notification, err error) {
 	req, err := http.NewRequest("GET", this.config.NotificationUrl+"/notifications", nil)
 	if err != nil {
-		log.Println("ERROR: unable to send notification", err)
+		this.config.GetLogger().Error("unable to send notification", "error", err)
 		return result, err
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -145,7 +144,7 @@ func (this *Canary) getNotifications(token string) (result []Notification, err e
 	resp, err := http.DefaultClient.Do(req)
 	this.metrics.NotificationReadLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		log.Println("ERROR: unable to read notification", err)
+		this.config.GetLogger().Error("unable to read notification", "error", err)
 		this.metrics.NotificationReadErr.Inc()
 		return result, err
 	}
@@ -153,13 +152,13 @@ func (this *Canary) getNotifications(token string) (result []Notification, err e
 	respMsg, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		this.metrics.NotificationReadErr.Inc()
-		log.Println("ERROR: unexpected response status from notifier", resp.StatusCode, string(respMsg))
+		this.config.GetLogger().Error("unexpected response status from notifier", "status-code", resp.StatusCode, "error", string(respMsg))
 		return result, errors.New("unexpected response status from notifier " + resp.Status)
 	}
 	temp := NotificationList{}
 	err = json.Unmarshal(respMsg, &temp)
 	if err != nil {
-		log.Println("ERROR: unable to read notifications json", err)
+		this.config.GetLogger().Error("unable to read notifications json", "error", err)
 		this.metrics.NotificationReadErr.Inc()
 		return result, err
 	}
@@ -175,7 +174,7 @@ func (this *Canary) deleteNotifications(token string, ids []string) (err error) 
 	}
 	req, err := http.NewRequest("DELETE", this.config.NotificationUrl+"/notifications", b)
 	if err != nil {
-		log.Println("ERROR: unable to send notification", err)
+		this.config.GetLogger().Error("unable to send notification", "error", err)
 		return err
 	}
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
@@ -188,7 +187,7 @@ func (this *Canary) deleteNotifications(token string, ids []string) (err error) 
 	resp, err := http.DefaultClient.Do(req)
 	this.metrics.NotificationDeleteLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		log.Println("ERROR: unable to send notification", err)
+		this.config.GetLogger().Error("unable to send notification", "error", err)
 		this.metrics.NotificationDeleteErr.Inc()
 		return err
 	}
@@ -196,7 +195,7 @@ func (this *Canary) deleteNotifications(token string, ids []string) (err error) 
 	respMsg, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode >= 300 {
 		this.metrics.NotificationDeleteErr.Inc()
-		log.Println("ERROR: unexpected response status from notifier", resp.StatusCode, string(respMsg))
+		this.config.GetLogger().Error("unexpected response status from notifier", "status-code", resp.StatusCode, "error", string(respMsg))
 		return errors.New("unexpected response status from notifier " + resp.Status)
 	}
 	return nil

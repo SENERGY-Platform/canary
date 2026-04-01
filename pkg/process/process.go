@@ -17,15 +17,14 @@
 package process
 
 import (
-	"encoding/json"
 	"errors"
+	"sync/atomic"
+	"time"
+
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
-	"log"
-	"sync/atomic"
-	"time"
 )
 
 type Process struct {
@@ -56,7 +55,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	ids, err := this.ListCanaryProcessDeployments(token)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR: unexpected process deployment list count")
+		this.config.GetLogger().Error("unable to list canary process deployments", "error", err)
 		return err
 	}
 	//cleanup
@@ -64,7 +63,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		err = this.DeleteProcess(token, id)
 		if err != nil {
 			this.metrics.UncategorizedErr.Inc()
-			log.Println("ERROR: DeleteProcess()", err)
+			this.config.GetLogger().Error("unable to delete canary process deployment", "error", err)
 			return err
 		}
 	}
@@ -72,7 +71,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	dt, err, _ := this.devicerepo.ReadDeviceType(info.DeviceTypeId, token)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR: ReadDeviceType()", err)
+		this.config.GetLogger().Error("unable to read device-type", "error", err)
 		return err
 	}
 	serviceId := ""
@@ -90,7 +89,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	preparedDepl, err := this.PrepareProcessDeployment(token)
 	if err != nil {
 		this.metrics.ProcessPreparedDeploymentErr.Inc()
-		log.Println("ERROR: ProcessPreparedDeploymentErr", err)
+		this.config.GetLogger().Error("unable to prepare process deployment", "error", err)
 	} else {
 		foundService := false
 		foundDevice := false
@@ -110,19 +109,18 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 		}
 		if !foundDevice {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			log.Println("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundDevice", info.Id)
+			this.config.GetLogger().Error("device not found in prepared process selection options", "device", info.Id)
 		}
 		if !foundService {
 			this.metrics.ProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
-			temp, _ := json.Marshal(preparedDepl)
-			log.Printf("ERROR: ProcessUnexpectedPreparedDeploymentSelectablesErr !foundService %v \n %#v \n", serviceId, string(temp))
+			this.config.GetLogger().Error("service not found in prepared process selection options", "service", serviceId)
 		}
 	}
 
 	deplId, err := this.DeployProcess(token, info.Id, serviceId)
 	if err != nil {
 		this.metrics.ProcessDeploymentErr.Inc()
-		log.Println("ERROR: ProcessDeploymentErr", err)
+		this.config.GetLogger().Error("unable to deploy process", "error", err)
 		return err
 	}
 
@@ -131,7 +129,7 @@ func (this *Process) ProcessStartup(token string, info DeviceInfo) error {
 	err = this.StartProcess(token, deplId)
 	if err != nil {
 		this.metrics.ProcessStartErr.Inc()
-		log.Println("ERROR: ProcessStartErr", err)
+		this.config.GetLogger().Error("unable to start process", "error", err)
 		return err
 	}
 
@@ -146,7 +144,7 @@ func (this *Process) ProcessTeardown(token string) error {
 	}
 	if len(ids) != 1 {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR: unexpected process deployment list count")
+		this.config.GetLogger().Error("unexpected process deployment list count", "count", len(ids))
 	}
 
 	unfilteredInstances, err := this.GetProcessInstances(token)
@@ -159,15 +157,15 @@ func (this *Process) ProcessTeardown(token string) error {
 
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR: unexpected process list count", err)
+		this.config.GetLogger().Error("unable to get process instances", "error", err)
 	} else {
 		if len(instances) != 1 {
 			this.metrics.UncategorizedErr.Inc()
-			log.Println("ERROR: unexpected process instance list count", len(instances))
+			this.config.GetLogger().Error("unexpected process instance list count", "count", len(instances))
 		} else {
 			if instances[0].State != "COMPLETED" {
 				this.metrics.UnexpectedProcessInstanceStateErr.Inc()
-				log.Printf("ERROR: UnexpectedProcessInstanceStateErr %#v \n", instances)
+				this.config.GetLogger().Error("unexpected process instance state", "state", instances[0].State)
 			} else {
 				this.metrics.ProcessInstanceDurationMs.Set(float64(instances[0].DurationInMillis))
 			}
@@ -179,14 +177,14 @@ func (this *Process) ProcessTeardown(token string) error {
 		err = this.DeleteProcess(token, id)
 		if err != nil {
 			this.metrics.UncategorizedErr.Inc()
-			log.Println("ERROR: DeleteProcess()", err)
+			this.config.GetLogger().Error("unable to delete canary process deployment", "error", err)
 			return err
 		}
 	}
 
 	if this.receivedCommands.Load() == 0 {
 		this.metrics.ProcessUnexpectedCommandCountError.Inc()
-		log.Println("ERROR: ProcessUnexpectedCommandCountError", this.receivedCommands.Load())
+		this.config.GetLogger().Error("unexpected command count", "count", this.receivedCommands.Load())
 	}
 	return nil
 }

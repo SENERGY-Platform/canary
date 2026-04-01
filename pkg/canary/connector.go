@@ -19,7 +19,6 @@ package canary
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -90,12 +89,12 @@ func (this *Canary) checkDeviceConnState(token string, info DeviceInfo, expected
 	device, err, _ := this.devicerepo.ReadExtendedDevice(info.Id, token, model.READ, false)
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
-		log.Println("ERROR: checkDeviceConnState()", err)
+		this.config.GetLogger().Error("unable to read device", "error", err)
 		this.metrics.DeviceRepoRequestErr.Inc()
 		return
 	}
 	if (device.ConnectionState == models.ConnectionStateOnline) != expectedConnState {
-		log.Printf("Unexpected device donnection-state: actual(%#v); expected(connected=%#v)\n", device.ConnectionState, expectedConnState)
+		this.config.GetLogger().Warn("Unexpected device connection-state", "actual", device.ConnectionState, "expected", expectedConnState)
 		if expectedConnState {
 			this.metrics.UnexpectedDeviceOfflineStateErr.Inc()
 		} else {
@@ -117,7 +116,7 @@ func (this *Canary) connect(token string, hubId string) (conn *Conn, err error) 
 		SetCleanSession(true).
 		AddBroker(this.config.ConnectorMqttBrokerUrl).
 		SetConnectionLostHandler(func(c paho.Client, err error) {
-			log.Println("lost connection:", hubId, err)
+			this.config.GetLogger().Error("lost connection", "error", err)
 		})
 
 	if this.config.UseCert {
@@ -141,7 +140,7 @@ func (this *Canary) connect(token string, hubId string) (conn *Conn, err error) 
 	conToken.Wait()
 	this.metrics.ConnectorLoginLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if conToken.Error() != nil {
-		log.Println("Error on Client.Connect(): ", conToken.Error())
+		this.config.GetLogger().Error("unable to connect", "error", conToken.Error())
 		this.metrics.ConnectorLoginErr.Inc()
 		return conn, conToken.Error()
 	}
@@ -166,7 +165,7 @@ func (this *Canary) subscribe(info DeviceInfo, conn *Conn) {
 	token.Wait()
 	this.metrics.ConnectorSubscribeLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if token.Error() != nil {
-		log.Println("Error on Client.Subscribe(): ", token.Error())
+		this.config.GetLogger().Error("unable to subscribe", "error", token.Error())
 		this.metrics.ConnectorSubscribeErr.Inc()
 		return
 	}
@@ -192,7 +191,7 @@ func (this *Canary) respond(conn *Conn, cmdtopic string, cmdpayload []byte) {
 	request := RequestEnvelope{}
 	err := json.Unmarshal(cmdpayload, &request)
 	if err != nil {
-		log.Println("ERROR: unable to decode request envalope", err)
+		this.config.GetLogger().Error("unable to decode request envelope", "error", err)
 		return
 	}
 
@@ -203,7 +202,7 @@ func (this *Canary) respond(conn *Conn, cmdtopic string, cmdpayload []byte) {
 
 	payload, err := json.Marshal(ResponseEnvelope{CorrelationId: request.CorrelationId, Payload: emptyResp})
 	if err != nil {
-		log.Println("ERROR: respond marshal", err)
+		this.config.GetLogger().Error("unable to encode response envelope", "error", err)
 		this.metrics.UncategorizedErr.Inc()
 		return
 	}
@@ -213,7 +212,7 @@ func (this *Canary) respond(conn *Conn, cmdtopic string, cmdpayload []byte) {
 	token := conn.Client.Publish(topic, 2, false, payload)
 	token.Wait()
 	if token.Error() != nil {
-		log.Println("ERROR: respond Publish", err)
+		this.config.GetLogger().Error("unable to publish response", "error", token.Error())
 		this.metrics.UncategorizedErr.Inc()
 		return
 	}
@@ -237,7 +236,7 @@ func (this *Canary) publish(info DeviceInfo, conn *Conn, value int) {
 	token.Wait()
 	this.metrics.ConnectorPublishLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if token.Error() != nil {
-		log.Println("Error on Client.Subscribe(): ", token.Error())
+		this.config.GetLogger().Error("unable to publish", "error", token.Error())
 		this.metrics.ConnectorPublishErr.Inc()
 		return
 	}
@@ -255,7 +254,7 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceRepoRequestErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to read device-type", "error", err)
 		debug.PrintStack()
 		return
 	}
@@ -282,7 +281,7 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	req, err := http.NewRequest(http.MethodPost, this.config.LastValueQueryUrl, buf)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create last value query http request", "error", err)
 		debug.PrintStack()
 		return
 	}
@@ -292,9 +291,7 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 	this.metrics.DeviceDataRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceDataRequestErr.Inc()
-		log.Println("ERROR:", err)
-		log.Printf("DEBUG: body=%#v\n", body)
-		log.Printf("DEBUG: dt=%#v\n", dt)
+		this.config.GetLogger().Error("unable to read last value", "error", err, "body", body, "dt", dt)
 		debug.PrintStack()
 	}
 
@@ -302,13 +299,13 @@ func (this *Canary) checkDeviceValue(token string, info DeviceInfo, value int) {
 
 	if len(lastValues) != 1 {
 		this.metrics.UnexpectedDeviceDataErr.Inc()
-		log.Printf("UnexpectedDeviceDataErr: %#v\n", lastValues)
+		this.config.GetLogger().Error("unexpected last value list count", "count", len(lastValues))
 		return
 	}
 
 	if !reflect.DeepEqual(lastValues[0].Value, expected) {
 		this.metrics.UnexpectedDeviceDataErr.Inc()
-		log.Printf("UnexpectedDeviceDataErr: %#v, %#v\n", lastValues[0].Value, expected)
+		this.config.GetLogger().Error("unexpected last value", "expected", expected, "actual", lastValues[0].Value)
 		return
 	}
 }

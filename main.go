@@ -19,14 +19,15 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/SENERGY-Platform/canary/pkg"
-	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/SENERGY-Platform/canary/pkg"
+	"github.com/SENERGY-Platform/canary/pkg/configuration"
 )
 
 func main() {
@@ -52,7 +53,7 @@ func main() {
 		shutdown := make(chan os.Signal, 1)
 		signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 		sig := <-shutdown
-		log.Println("received shutdown signal", sig)
+		config.GetLogger().Info("received shutdown signal", "signal", sig)
 		cancel()
 	}()
 

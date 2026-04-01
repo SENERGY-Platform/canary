@@ -20,10 +20,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"log"
 	"net/http"
 	"runtime/debug"
+
+	"github.com/SENERGY-Platform/canary/pkg/configuration"
 )
 
 type Controller interface {
@@ -48,15 +49,16 @@ func Start(ctx context.Context, config configuration.Config, ctrl Controller) (e
 
 	server := &http.Server{Addr: ":" + config.ServerPort, Handler: router}
 	go func() {
-		log.Println("listening on ", server.Addr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		config.GetLogger().Info("listening", "address", server.Addr)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			debug.PrintStack()
+			config.GetLogger().Error("fatal error", "error", err)
 			log.Fatal("FATAL:", err)
 		}
 	}()
 	go func() {
 		<-ctx.Done()
-		log.Println("api shutdown", server.Shutdown(context.Background()))
+		config.GetLogger().Info("shutdown", "result", server.Shutdown(context.Background()))
 	}()
 	return
 }

@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -31,7 +30,7 @@ func (this *Canary) login() (token string, refreshToken string, err error) {
 	this.metrics.AuthCount.Inc()
 	defer func() {
 		if err != nil {
-			log.Println("ERROR: login():", err)
+			this.config.GetLogger().Error("ERROR: login()", "error", err)
 			this.metrics.AuthErr.Inc()
 		}
 	}()

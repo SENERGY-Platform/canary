@@ -23,7 +23,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -65,7 +64,7 @@ func (this *Canary) loadClientCertFromFile() (cert tls.Certificate, err error) {
 	}
 	cert, err = tls.LoadX509KeyPair(certPath, keyPath)
 	if err != nil {
-		log.Println("ERROR: tls.LoadX509KeyPair()", err)
+		this.config.GetLogger().Error("ERROR: tls.LoadX509KeyPair()", "error", err)
 		return cert, errors.Join(ErrNewCertNeeded, err)
 	}
 	if cert.Leaf != nil && !cert.Leaf.NotAfter.IsZero() && cert.Leaf.NotAfter.Before(time.Now()) {

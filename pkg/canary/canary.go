@@ -18,7 +18,6 @@ package canary
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -88,7 +87,7 @@ func (this *Canary) GetMetricsHandler() (h http.Handler, err error) {
 }
 
 func (this *Canary) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	log.Printf("%v [%v] %v \n", request.RemoteAddr, request.Method, request.URL)
+	this.config.GetLogger().Info("request", "method", request.Method, "url", request.URL, "remote_addr", request.RemoteAddr)
 	if this.promHttpHandler == nil {
 		this.promHttpHandler = promhttp.HandlerFor(
 			this.reg,
@@ -103,14 +102,14 @@ func (this *Canary) ServeHTTP(writer http.ResponseWriter, request *http.Request)
 
 func (this *Canary) StartTests() {
 	go func() {
-		log.Println("start canary tests")
+		this.config.GetLogger().Info("start canary tests")
 		isCurrentlyRunning, done := this.running()
 		if isCurrentlyRunning {
-			log.Println("test are currently already running")
+			this.config.GetLogger().Info("test are currently already running")
 			return
 		}
 		defer done()
-		defer log.Println("canary tests are finished")
+		defer this.config.GetLogger().Info("canary tests are finished")
 		wg := &sync.WaitGroup{}
 
 		token, refresh, err := this.login()

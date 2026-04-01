@@ -19,13 +19,13 @@ package canary
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
-	"github.com/SENERGY-Platform/device-repository/lib/client"
-	"log"
 	"net/http"
 	"net/url"
 	"runtime/debug"
 	"time"
+
+	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
+	"github.com/SENERGY-Platform/device-repository/lib/client"
 )
 
 func (this *Canary) ensureHub(token string, device DeviceInfo) (hubId string, err error) {
@@ -73,7 +73,7 @@ func (this *Canary) listCanaryHubs(token string) (hubs []HubInfo, err error) {
 	this.metrics.DeviceRepoRequestLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceRepoRequestErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to list hubs", "error", err)
 		debug.PrintStack()
 		return hubs, err
 	}
@@ -110,7 +110,7 @@ func (this *Canary) createCanaryHub(token string, device DeviceInfo) (hubId stri
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to create hub", "error", err)
 		debug.PrintStack()
 	}
 	time.Sleep(this.getChangeGuaranteeDuration())
@@ -140,7 +140,7 @@ func (this *Canary) updateCanaryHub(token string, hubId string, device DeviceInf
 	this.metrics.DeviceMetaUpdateLatencyMs.Set(float64(time.Since(start).Milliseconds()))
 	if err != nil {
 		this.metrics.DeviceMetaUpdateErr.Inc()
-		log.Println("ERROR:", err)
+		this.config.GetLogger().Error("unable to update hub", "error", err)
 		debug.PrintStack()
 	}
 	time.Sleep(this.getChangeGuaranteeDuration())
