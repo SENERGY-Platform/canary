@@ -31,13 +31,36 @@ import (
 //go:embed deployment.json
 var DeploymentModelTemplate string
 
-func getDeploymentMessage(deviceId string, serviceId string) (buff *bytes.Buffer, err error) {
+// selectionCriteria are the ids the service task filters on. they have to match
+// the cmd service that devicemetadata creates, so they come from the same config.
+func (this *Process) selectionCriteria() map[string]string {
+	return map[string]string{
+		"CmdFunctionId":       this.config.CanaryCmdFunctionId,
+		"CmdCharacteristicId": this.config.CanaryCmdCharacteristicId,
+		"DeviceClassId":       this.config.CanaryDeviceClassId,
+	}
+}
+
+func (this *Process) getDeploymentMessage(deviceId string, serviceId string) (buff *bytes.Buffer, err error) {
+	bpmn, err := this.getProcessBpmn()
+	if err != nil {
+		return buff, err
+	}
+	//the deployment model repeats the bpmn as a json string, it has to stay identical to the prepared one
+	xml, err := json.Marshal(bpmn)
+	if err != nil {
+		return buff, err
+	}
 	templ, err := template.New("deployment").Parse(DeploymentModelTemplate)
 	if err != nil {
 		return buff, err
 	}
+	values := this.selectionCriteria()
+	values["DeviceId"] = deviceId
+	values["ServiceId"] = serviceId
+	values["Xml"] = string(xml)
 	buff = &bytes.Buffer{}
-	err = templ.Execute(buff, map[string]string{"DeviceId": deviceId, "ServiceId": serviceId})
+	err = templ.Execute(buff, values)
 	return buff, err
 }
 
@@ -45,7 +68,7 @@ func (this *Process) DeployProcess(token string, deviceId string, serviceId stri
 	endpoint := this.config.ProcessDeploymentUrl + "/v3/deployments?source=sepl"
 	method := "POST"
 
-	buff, err := getDeploymentMessage(deviceId, serviceId)
+	buff, err := this.getDeploymentMessage(deviceId, serviceId)
 	if err != nil {
 		return "", err
 	}
@@ -205,17 +228,32 @@ func (this *Process) GetProcessInstances(token string) (result []ProcessInstance
 }
 
 //go:embed canary_process.bpmn
-var ProcessBpmn string
+var ProcessBpmnTemplate string
 
 //go:embed canary_process.svg
 var ProcessSvg string
+
+func (this *Process) getProcessBpmn() (result string, err error) {
+	templ, err := template.New("bpmn").Parse(ProcessBpmnTemplate)
+	if err != nil {
+		return result, err
+	}
+	buff := &bytes.Buffer{}
+	err = templ.Execute(buff, this.selectionCriteria())
+	return buff.String(), err
+}
 
 func (this *Process) PrepareProcessDeployment(token string) (result PreparedDeployment, err error) {
 	endpoint := this.config.ProcessDeploymentUrl + "/v3/prepared-deployments"
 	method := "POST"
 
+	bpmn, err := this.getProcessBpmn()
+	if err != nil {
+		return result, err
+	}
+
 	msg, err := json.Marshal(map[string]interface{}{
-		"xml": ProcessBpmn,
+		"xml": bpmn,
 		"svg": ProcessSvg,
 	})
 	if err != nil {
