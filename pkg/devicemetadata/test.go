@@ -24,7 +24,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	devicemodel "github.com/SENERGY-Platform/device-repository/lib/model"
+	devicemodel "github.com/SENERGY-Platform/device-repository/v3/lib/model"
 )
 
 func (this *DeviceMetaData) TestMetadata(token string, info DeviceInfo) {

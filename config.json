@@ -13,8 +13,7 @@
     "connector_mqtt_broker_url": "tls://certconnector.senergy.infai.org:28888",
     "last_value_query_url": "https://api.senergy.infai.org/db/v3/last-values",
     "notification_url": "https://api.senergy.infai.org/notifications-v2",
-    "process_deployment_url": "https://api.senergy.infai.org/process/deployment",
-    "process_engine_wrapper_url": "https://api.senergy.infai.org/process/engine",
+    "automation_engine_url": "https://api.senergy.infai.org/automation-engine",
 
     "canary_device_class_id": "urn:infai:ses:device-class:ff64280a-58e6-4cf9-9a44-e70d3831a79d",
     "canary_cmd_function_id": "urn:infai:ses:controlling-function:df08a869-f6b7-4c8a-ada7-2147255b6d70",

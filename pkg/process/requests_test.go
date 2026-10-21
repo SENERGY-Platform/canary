@@ -17,10 +17,13 @@
 package process
 
 import (
-	"encoding/json"
+	"context"
 	"strings"
 	"testing"
 
+	"github.com/SENERGY-Platform/automation-engine/pkg/client"
+	"github.com/SENERGY-Platform/automation-engine/pkg/engine"
+	"github.com/SENERGY-Platform/canary/pkg/automation"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 )
 
@@ -55,14 +58,9 @@ func TestProcessBpmnUsesConfiguredCriteria(t *testing.T) {
 	}
 }
 
-func TestDeploymentMessageUsesConfiguredCriteria(t *testing.T) {
+func TestDeploymentInputUsesConfiguredCriteria(t *testing.T) {
 	process := testProcess()
-	buff, err := process.getDeploymentMessage("device-id", "service-id")
-	if err != nil {
-		t.Fatal(err)
-	}
-	depl := map[string]interface{}{}
-	err = json.Unmarshal(buff.Bytes(), &depl)
+	input, err := process.getDeploymentInput("device-id", "service-id")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -71,37 +69,61 @@ func TestDeploymentMessageUsesConfiguredCriteria(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	diagram := depl["diagram"].(map[string]interface{})
-	if diagram["xml_raw"] != bpmn {
-		t.Error("xml_raw does not match the prepared bpmn")
+	if input.Xml != bpmn {
+		t.Error("xml does not match the prepared bpmn")
+	}
+	if input.Name != ExpectedCanaryDeploymentName {
+		t.Error("unexpected name", input.Name)
 	}
 
-	element := depl["elements"].([]interface{})[0].(map[string]interface{})
-	selection := element["task"].(map[string]interface{})["selection"].(map[string]interface{})
-	criteria := selection["filter_criteria"].(map[string]interface{})
-	if criteria["function_id"] != testCmdFunctionId {
-		t.Error("unexpected function_id", criteria["function_id"])
+	selection, ok := input.Selections[TaskId]
+	if !ok || len(input.Selections) != 1 {
+		t.Fatal("unexpected selections", input.Selections)
 	}
-	if criteria["device_class_id"] != testDeviceClassId {
-		t.Error("unexpected device_class_id", criteria["device_class_id"])
+	if selection.DeviceId != "device-id" {
+		t.Error("unexpected device id", selection.DeviceId)
 	}
-	if criteria["characteristic_id"] != testCmdCharacteristicId {
-		t.Error("unexpected characteristic_id", criteria["characteristic_id"])
+	if selection.ServiceId != "service-id" {
+		t.Error("unexpected service id", selection.ServiceId)
 	}
-
 	//the selected path is what the task writes the command to, it describes the same variable
-	path := selection["selected_path"].(map[string]interface{})
-	if path["functionId"] != testCmdFunctionId {
-		t.Error("unexpected path functionId", path["functionId"])
-	}
-	if path["characteristicId"] != testCmdCharacteristicId {
-		t.Error("unexpected path characteristicId", path["characteristicId"])
+	if selection.Path == nil || selection.Path.Path != "value" || selection.Path.CharacteristicId != testCmdCharacteristicId {
+		t.Error("unexpected path", selection.Path)
 	}
 
-	if selection["selected_device_id"] != "device-id" {
-		t.Error("unexpected selected_device_id", selection["selected_device_id"])
+	if input.Parameters[TaskId].Inputs["inputs"] != "42" {
+		t.Error("unexpected command value", input.Parameters[TaskId])
 	}
-	if selection["selected_service_id"] != "service-id" {
-		t.Error("unexpected selected_service_id", selection["selected_service_id"])
+}
+
+// the engine converts the bpmn of the old designer on deploy; nothing of it may be unsupported
+// and the task the selection refers to has to survive the conversion
+func TestEngineConvertsProcessBpmn(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	testEngine, err := client.NewTestClient(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	//the test engine has no device-repository; the deployed engine provides the task type
+	testEngine.Engine.RegisterTaskType("device_command", engine.TaskTypeFunc(func(ctx context.Context, task engine.Task) (engine.TaskResult, error) {
+		return engine.TaskResult{}, nil
+	}))
+	bpmn, err := testProcess().getProcessBpmn()
+	if err != nil {
+		t.Fatal(err)
+	}
+	conversion, err := testEngine.Convert(ctx, client.TestToken("canary"), automation.Namespace, bpmn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(conversion.Unsupported) > 0 {
+		t.Error("unsupported", conversion.Unsupported)
+	}
+	if issues := automation.BlockingIssues(conversion.Issues); len(issues) > 0 {
+		t.Error("issues", issues)
+	}
+	if !strings.Contains(conversion.Xml, `id="`+TaskId+`"`) {
+		t.Error("task missing in converted bpmn")
 	}
 }

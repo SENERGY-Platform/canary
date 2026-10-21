@@ -20,25 +20,29 @@ import (
 	"errors"
 	"time"
 
+	"github.com/SENERGY-Platform/automation-engine/pkg/model"
+	"github.com/SENERGY-Platform/canary/pkg/automation"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
-	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
+	devicerepo "github.com/SENERGY-Platform/device-repository/v3/lib/client"
 )
 
 type Events struct {
 	config               configuration.Config
 	devicerepo           devicerepo.Interface
+	engine               automation.Client
 	guaranteeChangeAfter time.Duration
 	metrics              *metrics.Metrics
 }
 
 type DeviceInfo = devicemetadata.DeviceInfo
 
-func New(config configuration.Config, devicerepo devicerepo.Interface, metrics *metrics.Metrics, guaranteeChangeAfter time.Duration) *Events {
+func New(config configuration.Config, devicerepo devicerepo.Interface, engine automation.Client, metrics *metrics.Metrics, guaranteeChangeAfter time.Duration) *Events {
 	return &Events{
 		config:               config,
 		devicerepo:           devicerepo,
+		engine:               engine,
 		guaranteeChangeAfter: guaranteeChangeAfter,
 		metrics:              metrics,
 	}
@@ -88,22 +92,10 @@ func (this *Events) ProcessStartup(token string, info DeviceInfo) error {
 		this.metrics.EventProcessPreparedDeploymentErr.Inc()
 		this.config.GetLogger().Error("unable to prepare process deployment", "error", err)
 	} else {
-		foundService := false
-		foundDevice := false
-		for _, e := range preparedDepl.Elements {
-			if e.BpmnId == "StartEvent_1" && e.ConditionalEvent != nil {
-				for _, o := range e.ConditionalEvent.Selection.SelectionOptions {
-					if o.Device != nil && o.Device.Id == info.Id {
-						foundDevice = true
-					}
-					for _, s := range o.Services {
-						if s.Id == serviceId {
-							foundService = true
-						}
-					}
-				}
-			}
+		if issues := automation.BlockingIssues(preparedDepl.Issues); len(issues) > 0 {
+			this.config.GetLogger().Error("prepared event process deployment has issues", "issues", issues)
 		}
+		foundDevice, foundService := automation.FindOption(preparedDepl, EventId, model.PreparedEvent, info.Id, serviceId)
 		if !foundDevice {
 			this.metrics.EventProcessUnexpectedPreparedDeploymentSelectablesErr.Inc()
 			this.config.GetLogger().Error("device not found in prepared process selection options")
@@ -137,14 +129,7 @@ func (this *Events) ProcessTeardown(token string) error {
 		this.config.GetLogger().Error("unexpected process deployment list count", "count", len(ids))
 	}
 
-	unfilteredInstances, err := this.GetProcessInstances(token)
-	instances := []ProcessInstance{}
-	for _, e := range unfilteredInstances {
-		if e.ProcessDefinitionName == ExpectedCanaryDeploymentName {
-			instances = append(instances, e)
-		}
-	}
-
+	instances, err := this.GetProcessInstances(token, ids)
 	if err != nil {
 		this.metrics.UncategorizedErr.Inc()
 		this.config.GetLogger().Error("unable to get process instances", "error", err)
@@ -153,11 +138,11 @@ func (this *Events) ProcessTeardown(token string) error {
 			this.metrics.UncategorizedErr.Inc()
 			this.config.GetLogger().Error("unexpected event process instance list count", "count", len(instances))
 		} else {
-			if instances[0].State != "COMPLETED" {
+			if instances[0].State != model.StateCompleted {
 				this.metrics.UnexpectedEventProcessInstanceStateErr.Inc()
 				this.config.GetLogger().Error("unexpected event process instance state", "state", instances[0].State)
 			} else {
-				this.metrics.EventProcessInstanceDurationMs.Set(float64(instances[0].DurationInMillis))
+				this.metrics.EventProcessInstanceDurationMs.Set(automation.DurationMs(instances[0]))
 			}
 		}
 	}

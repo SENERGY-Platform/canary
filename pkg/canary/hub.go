@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
-	"github.com/SENERGY-Platform/device-repository/lib/client"
+	"github.com/SENERGY-Platform/device-repository/v3/lib/client"
 )
 
 func (this *Canary) ensureHub(token string, device DeviceInfo) (hubId string, err error) {

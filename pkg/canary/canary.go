@@ -22,12 +22,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/SENERGY-Platform/canary/pkg/automation"
 	"github.com/SENERGY-Platform/canary/pkg/configuration"
 	"github.com/SENERGY-Platform/canary/pkg/devicemetadata"
 	"github.com/SENERGY-Platform/canary/pkg/events"
 	"github.com/SENERGY-Platform/canary/pkg/metrics"
 	"github.com/SENERGY-Platform/canary/pkg/process"
-	devicerepo "github.com/SENERGY-Platform/device-repository/lib/client"
+	devicerepo "github.com/SENERGY-Platform/device-repository/v3/lib/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -55,9 +56,11 @@ func New(ctx context.Context, wg *sync.WaitGroup, config configuration.Config) (
 	d := devicerepo.NewClient(config.DeviceRepositoryUrl, nil)
 	devicemeta := devicemetadata.NewDeviceMetaData(d, m, config, guaranteeChangeAfter)
 
-	p := process.New(config, d, m, guaranteeChangeAfter)
+	engine := automation.New(config.AutomationEngineUrl)
 
-	e := events.New(config, d, m, guaranteeChangeAfter)
+	p := process.New(config, d, engine, m, guaranteeChangeAfter)
+
+	e := events.New(config, d, engine, m, guaranteeChangeAfter)
 
 	return &Canary{
 		reg:                  reg,
