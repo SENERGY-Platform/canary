@@ -3,9 +3,9 @@ module github.com/SENERGY-Platform/canary
 go 1.27
 
 require (
-	github.com/SENERGY-Platform/automation-engine v0.0.0-20261021070352-edf6929d2df8
+	github.com/SENERGY-Platform/automation-engine v0.0.1
 	github.com/SENERGY-Platform/cert-certificate-authority v0.0.13
-	github.com/SENERGY-Platform/device-repository/v3 v3.4.0
+	github.com/SENERGY-Platform/device-repository/v3 v3.4.4
 	github.com/SENERGY-Platform/go-service-base/struct-logger v0.8.1
 	github.com/SENERGY-Platform/models/go v0.0.0-20260911075423-f01521c01da2
 	github.com/eclipse/paho.mqtt.golang v1.5.1
@@ -19,15 +19,14 @@ require (
 	github.com/RyanCarrier/dijkstra v1.4.0 // indirect
 	github.com/SENERGY-Platform/converter v0.0.12 // indirect
 	github.com/SENERGY-Platform/developer-notifications v0.0.6 // indirect
-	github.com/SENERGY-Platform/device-repository/v2 v2.2.2 // indirect
-	github.com/SENERGY-Platform/device-selection/v2 v2.0.3 // indirect
+	github.com/SENERGY-Platform/device-selection/v2 v2.1.0 // indirect
 	github.com/SENERGY-Platform/gin-middleware v0.14.1 // indirect
 	github.com/SENERGY-Platform/go-env-loader v0.5.3 // indirect
 	github.com/SENERGY-Platform/go-service-base/config-hdl v1.2.0 // indirect
 	github.com/SENERGY-Platform/marshaller v0.3.0 // indirect
 	github.com/SENERGY-Platform/mgw-cloud-proxy/cert-manager/lib v0.0.4 // indirect
 	github.com/SENERGY-Platform/permissions-v2 v1.0.0 // indirect
-	github.com/SENERGY-Platform/service-commons v0.0.0-20260915085610-4949c31a01ef // indirect
+	github.com/SENERGY-Platform/service-commons v0.0.0-20261016083822-dec36fce00ad // indirect
 	github.com/beevik/etree v1.8.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect

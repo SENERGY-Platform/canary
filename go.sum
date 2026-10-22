@@ -12,8 +12,8 @@ github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERo
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
 github.com/RyanCarrier/dijkstra v1.4.0 h1:wkEVdTBLUiXjeBvDrSuagr72pOt36rUQoIfnnGxFYoQ=
 github.com/RyanCarrier/dijkstra v1.4.0/go.mod h1:9egjhC7eVsfREX6NrYS+1wHzk9C/9v2Cz26/bqpjjTc=
-github.com/SENERGY-Platform/automation-engine v0.0.0-20261021070352-edf6929d2df8 h1:ROtPNOOoAWE75+qHQ+He2OmYjnAciBPEj59UyyB4lpY=
-github.com/SENERGY-Platform/automation-engine v0.0.0-20261021070352-edf6929d2df8/go.mod h1:twMygK3ZCQ2//wBtei0bYgJq5KnXUg9bEi7w5jSPJek=
+github.com/SENERGY-Platform/automation-engine v0.0.1 h1:S7ngHG1xIw4h1CB2ofzTFHcceQxl0ylxRtKqKh3arvI=
+github.com/SENERGY-Platform/automation-engine v0.0.1/go.mod h1:iXseYXJy3H/+mcwIiBwBomVFrdNqbT0VdroZnl94BNw=
 github.com/SENERGY-Platform/cert-certificate-authority v0.0.13 h1:c9f/57DCviNs/wh6sVuhsH3e7yxXihT0w91uVfdSIC4=
 github.com/SENERGY-Platform/cert-certificate-authority v0.0.13/go.mod h1:R9ywWnO97fuTL8h/v9R7vlO6TZe5crcfnX2WHbszOQE=
 github.com/SENERGY-Platform/converter v0.0.12 h1:K0T2eV4sqbmL3RpgG/PujSyykW+FJweKWw6h3EyFH4g=
@@ -22,10 +22,10 @@ github.com/SENERGY-Platform/developer-notifications v0.0.6 h1:sUr3n5YTs3zTYKSEi4
 github.com/SENERGY-Platform/developer-notifications v0.0.6/go.mod h1:DwfWoj00UUN4v9fCi60frXbFycFUIIvXeKzmABcgHK8=
 github.com/SENERGY-Platform/device-repository/v2 v2.2.2 h1:Amuki9bjVOGH5aYvNd4srCI9BcQN+nNB8f/MMP5dP9Q=
 github.com/SENERGY-Platform/device-repository/v2 v2.2.2/go.mod h1:ZQ5L+wjWtof8XsZxbMX/3hk0yVqpjXg+i+w46jr/zWk=
-github.com/SENERGY-Platform/device-repository/v3 v3.4.0 h1:K9jITusF3QV9SR/UiuA5J9B4/fM+4d5YgsV3q81sBOg=
-github.com/SENERGY-Platform/device-repository/v3 v3.4.0/go.mod h1:JgECL7Z8+DalUZCMHO7+yJpJ8xtGM7u+huT9Xac7oZA=
-github.com/SENERGY-Platform/device-selection/v2 v2.0.3 h1:Oy87B0aV1bJAfjtk2WFcuQI86gmw50WN6Ux6RroR5Zw=
-github.com/SENERGY-Platform/device-selection/v2 v2.0.3/go.mod h1:EOV/ILAfaD+b1EsN2RIxcb/lRD9AZfya+xp320rqMw4=
+github.com/SENERGY-Platform/device-repository/v3 v3.4.4 h1:JEWxvj6xr2G7DqyJGX1c8tEOx4VEObeio3JkYy+n6U0=
+github.com/SENERGY-Platform/device-repository/v3 v3.4.4/go.mod h1:AeDWppY6UF60F+LE2IcpY9/tQFDg+en4A+eJ+9VGcCM=
+github.com/SENERGY-Platform/device-selection/v2 v2.1.0 h1:9kYfiu7PopGqAiniV1Z6G+9g4Amag8Xd/I7M3bKjgkU=
+github.com/SENERGY-Platform/device-selection/v2 v2.1.0/go.mod h1:/mUYIRyl7rG4QoQWQJdXo+9prkSMIr+F40qBMdhwD28=
 github.com/SENERGY-Platform/gin-middleware v0.14.1 h1:o2le7do9++e377ixtnFXbobAJP5CSMQXW7d1dUSAwFU=
 github.com/SENERGY-Platform/gin-middleware v0.14.1/go.mod h1:+9dhC08w9tpnjnFC8gYO0+0Po5TKfeUGt+5a1jUVfqI=
 github.com/SENERGY-Platform/go-env-loader v0.5.3 h1:sNM/psxYBs3DeDCw8P8gWM2hvySijwy9t2DdSGdhF1c=
@@ -42,8 +42,8 @@ github.com/SENERGY-Platform/models/go v0.0.0-20260911075423-f01521c01da2 h1:CEjL
 github.com/SENERGY-Platform/models/go v0.0.0-20260911075423-f01521c01da2/go.mod h1:5B2cSnYKuAmeco4mJPhY5eVO+oMqXLmnl9wxh1G7e9E=
 github.com/SENERGY-Platform/permissions-v2 v1.0.0 h1:poeecCpXYD8GOADLyihiMbgMCr6ARrIZ7ba1sOEHWvw=
 github.com/SENERGY-Platform/permissions-v2 v1.0.0/go.mod h1:O0DTzApbQnXzDmyQ3KzievzjRF44xQ7n6qdbfQ36Qw8=
-github.com/SENERGY-Platform/service-commons v0.0.0-20260915085610-4949c31a01ef h1:LazqUA3nKDG7DA6Un0yD1jfJsudxLVq7J0a2TNDNdHY=
-github.com/SENERGY-Platform/service-commons v0.0.0-20260915085610-4949c31a01ef/go.mod h1:k1Jia3JItpaM26/SY1ZGyoGhBE8EA5zQrkwSaiFZKGQ=
+github.com/SENERGY-Platform/service-commons v0.0.0-20261016083822-dec36fce00ad h1:89BGue8JorkeIPcrFnPExRO4hpwur1spF3ET63ORn3o=
+github.com/SENERGY-Platform/service-commons v0.0.0-20261016083822-dec36fce00ad/go.mod h1:k1Jia3JItpaM26/SY1ZGyoGhBE8EA5zQrkwSaiFZKGQ=
 github.com/beevik/etree v1.8.1 h1:MchsAnqPGCGsfQezhwcouHPlAHlcAOqWpyCVZoyWfjU=
 github.com/beevik/etree v1.8.1/go.mod h1:bh4zJxiIr62SOf9pRzN7UUYaEDa9HEKafK25+sLc0Gc=
 github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
